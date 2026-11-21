@@ -2,8 +2,10 @@ import { clinic } from './clinic.config.js';
 import { bookingChannel, buildBookingMessage, telHref, whatsappHref } from './lib/clinic-utils.js';
 import { initStage } from './stage.js';
 import { MODALITY_COPY, SIZE_COPY } from './content/stones.js';
+import { initMotion } from './motion.js';
 
 const stage = initStage();
+initMotion();
 
 /* ---------------------------------------------------------------------------
  * Mobile menu
@@ -33,7 +35,22 @@ if (menuBtn && nav) {
  * ------------------------------------------------------------------------- */
 function setPressed(buttons, active) {
   buttons.forEach(b => b.setAttribute('aria-pressed', String(b === active)));
+  const group = active.closest('.segmented');
+  if (group) group.style.setProperty('--index', String(buttons.indexOf(active)));
 }
+
+function swapIn(el) {
+  el.classList.remove('is-swapping');
+  void el.offsetWidth; // restart the animation
+  el.classList.add('is-swapping');
+}
+
+// Sync the sliding indicator with the initially pressed buttons.
+document.querySelectorAll('.segmented').forEach(group => {
+  const buttons = [...group.querySelectorAll('.seg')];
+  const pressed = buttons.findIndex(b => b.getAttribute('aria-pressed') === 'true');
+  group.style.setProperty('--index', String(Math.max(0, pressed)));
+});
 
 const sizeButtons = [...document.querySelectorAll('[data-mm]')];
 const sizeResult = document.getElementById('size-result');
@@ -41,7 +58,10 @@ sizeButtons.forEach(btn =>
   btn.addEventListener('click', () => {
     const mm = Number(btn.dataset.mm);
     setPressed(sizeButtons, btn);
-    if (sizeResult && SIZE_COPY[mm]) sizeResult.innerHTML = SIZE_COPY[mm];
+    if (sizeResult && SIZE_COPY[mm]) {
+      sizeResult.innerHTML = SIZE_COPY[mm];
+      swapIn(sizeResult);
+    }
     stage.call('setStoneSize', mm);
   })
 );
@@ -57,6 +77,7 @@ modalityButtons.forEach(btn =>
     if (modalityResult) {
       modalityResult.innerHTML =
         `<p>${copy.text}</p><ul class="tag-row">` + copy.tags.map(t => `<li>${t}</li>`).join('') + '</ul>';
+      swapIn(modalityResult);
     }
     stage.call('setModality', key);
   })
@@ -72,7 +93,7 @@ if (form && channel) {
   const submit = document.getElementById('book-submit');
   const privacy = form.querySelector('.privacy');
   if (channel === 'phone') {
-    submit.textContent = 'Call the clinic to book';
+    submit.querySelector('span').textContent = 'Call the clinic to book';
     if (privacy) privacy.textContent = 'This starts a phone call to the clinic. Nothing is stored on this website.';
   }
 

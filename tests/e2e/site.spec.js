@@ -15,7 +15,7 @@ function trackErrors(page) {
 test('loads without errors and brings the 3D scene to life', async ({ page }) => {
   const errors = trackErrors(page);
   await page.goto('./');
-  await expect(page.locator('h1')).toHaveText(/Kidney stone, prostate and men’s health specialist/);
+  await expect(page.locator('h1')).toContainText('Precision care for');
   await expect(page.locator('html')).toHaveAttribute('data-scene', 'live', { timeout: 45_000 });
   await expect(page.locator('#stage canvas')).toHaveAttribute('aria-hidden', 'true');
   expect(errors).toEqual([]);
@@ -147,6 +147,9 @@ test('mobile menu opens, navigates and closes', async ({ page }, testInfo) => {
 });
 
 test('has no serious accessibility violations', async ({ page }) => {
+  // Reduced motion shows every element in its final state, so contrast is
+  // measured on what visitors read rather than on mid-animation frames.
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('./');
   await page.locator('.faq-item').first().locator('summary').click();
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();

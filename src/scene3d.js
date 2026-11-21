@@ -4,6 +4,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 
 // Deterministic PRNG for reproducible organic 3D anatomy & crystal facets
 function mulberry32(seed) {
@@ -55,15 +56,30 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   renderer.setPixelRatio(initialDpr);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.06;
+  renderer.toneMappingExposure = 1.0;
   renderer.domElement.setAttribute('aria-hidden', 'true');
   container.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
-  const darkBg = new THREE.Color(0x08131f);
-  const lightBg = new THREE.Color(0xeef4f8);
-  scene.background = darkBg.clone();
-  scene.fog = new THREE.FogExp2(0x08131f, 0.032);
+  // Cinematic backdrop: a soft teal-navy glow behind the anatomy, falling off to near black.
+  function createBackdropTexture() {
+    const c = document.createElement('canvas');
+    c.width = 1024;
+    c.height = 1024;
+    const g = c.getContext('2d');
+    const grad = g.createRadialGradient(640, 420, 40, 560, 520, 760);
+    grad.addColorStop(0, '#16303f');
+    grad.addColorStop(0.35, '#0c1b26');
+    grad.addColorStop(0.75, '#060c12');
+    grad.addColorStop(1, '#04070b');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, 1024, 1024);
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    return tex;
+  }
+  scene.background = createBackdropTexture();
+  scene.fog = new THREE.FogExp2(0x060c12, 0.03);
 
   const camera = new THREE.PerspectiveCamera(
     38,
@@ -89,12 +105,47 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
 
   const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(window.innerWidth, window.innerHeight),
-    0.34,
-    0.45,
-    0.88
+    0.42,
+    0.62,
+    0.84
   );
   if (!lowPower) composer.addPass(bloomPass);
   composer.addPass(new OutputPass());
+
+  // Film finish: vignette, fine animated grain and a whisper of lens fringing at the edges.
+  const filmPass = new ShaderPass({
+    uniforms: {
+      tDiffuse: { value: null },
+      uTime: { value: 0 },
+      uGrain: { value: lowPower ? 0.035 : 0.045 },
+      uVignette: { value: 0.9 },
+      uFringe: { value: lowPower ? 0.0 : 0.0016 }
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
+    `,
+    fragmentShader: `
+      uniform sampler2D tDiffuse;
+      uniform float uTime, uGrain, uVignette, uFringe;
+      varying vec2 vUv;
+      float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+      void main() {
+        vec2 c = vUv - 0.5;
+        float d = length(c);
+        vec2 off = c * d * uFringe * 8.0;
+        vec3 col;
+        col.r = texture2D(tDiffuse, vUv + off).r;
+        col.g = texture2D(tDiffuse, vUv).g;
+        col.b = texture2D(tDiffuse, vUv - off).b;
+        col *= mix(1.0, smoothstep(0.85, 0.2, d), uVignette);
+        float n = hash(vUv * vec2(1920.0, 1080.0) + fract(uTime) * 97.0) - 0.5;
+        col += n * uGrain;
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `
+  });
+  composer.addPass(filmPass);
 
   // =========================================================================
   // 2. SURGICAL STUDIO 3-POINT LIGHTING
@@ -106,9 +157,14 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   keyLight.position.set(5.5, 8.0, 6.5);
   scene.add(keyLight);
 
-  const rimLightCyan = new THREE.DirectionalLight(0x38bdf8, 1.65);
-  rimLightCyan.position.set(-6.0, 3.0, -4.5);
+  const rimLightCyan = new THREE.DirectionalLight(0x5fd4ff, 2.6);
+  rimLightCyan.position.set(-6.0, 4.0, -5.5);
   scene.add(rimLightCyan);
+
+  // Warm back light from the other side: separates the organs from the background.
+  const rimLightWarm = new THREE.DirectionalLight(0xffb48a, 1.5);
+  rimLightWarm.position.set(6.5, 1.5, -5.0);
+  scene.add(rimLightWarm);
 
   const warmSubsurfaceLight = new THREE.PointLight(0xff6b5b, 1.8, 12, 1.6);
   warmSubsurfaceLight.position.set(1.2, 4.2, -1.6);
@@ -889,18 +945,6 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   window.addEventListener('resize', onResize, { passive: true });
 
 
-  function applyStudioTheme(themeName) {
-    appState.theme = themeName;
-    const isLight = themeName === 'light';
-    const targetBg = isLight ? lightBg : darkBg;
-    scene.background.copy(targetBg);
-    scene.fog.color.copy(targetBg);
-    scene.fog.density = isLight ? 0.018 : 0.032;
-    ambientLight.intensity = isLight ? 1.25 : 0.65;
-    keyLight.intensity = isLight ? 2.5 : 2.2;
-    bloomPass.strength = isLight ? 0.18 : 0.34;
-    bokehMat.opacity = isLight ? 0.08 : 0.22;
-  }
 
   // =========================================================================
   // 12. MAIN 60FPS ANIMATION & 3D CHOREOGRAPHY LOOP
@@ -909,6 +953,20 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   const tempVec = new THREE.Vector3();
   const camTargetLook = new THREE.Vector3();
   const clock = new THREE.Timer();
+
+  // Tissue finish: keep the wet clearcoat, add a faint deep-red sheen at grazing
+  // angles for a soft-tissue look. Phones skip the costly transmission pass.
+  kidneyCortexMat.color.setHex(0xb8343f);
+  [kidneyCortexMat, ureterMat, bladderMat, prostateMat, calyxMat, pyramidMat].forEach(m => {
+    m.sheen = 0.3;
+    m.sheenColor = new THREE.Color(0xff5a4a);
+    m.sheenRoughness = 0.55;
+    m.clearcoatRoughness = Math.max(m.clearcoatRoughness, 0.14);
+    if (lowPower && m.transmission > 0) {
+      m.transmission = 0;
+      m.opacity = Math.max(m.opacity, 0.94);
+    }
+  });
 
   let running = false;
   let rafId = 0;
@@ -920,6 +978,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
 
     clock.update();
     const elapsed = clock.getElapsed();
+    filmPass.uniforms.uTime.value = elapsed;
     appState.scrollCurrent += (appState.scrollTarget - appState.scrollCurrent) * 0.09;
     const p = appState.scrollCurrent;
 
@@ -1257,9 +1316,6 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     },
     setModality(mod) {
       appState.modality = mod;
-    },
-    setTheme(theme) {
-      applyStudioTheme(theme);
     }
   };
 }

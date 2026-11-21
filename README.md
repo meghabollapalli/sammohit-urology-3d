@@ -31,6 +31,8 @@ npm run test:e2e     # Playwright end-to-end + axe accessibility tests (desktop 
 | `src/content/faq.js` | FAQ, rendered into the page and into FAQPage schema. |
 | `src/content/stones.js` | Copy for the stone size and procedure pickers. |
 | `src/main.js` | Menu, pickers and WhatsApp booking. |
+| `src/motion.js` | Headline word reveals, scroll reveals, header progress, chapter rail. Skipped with reduced motion. |
+| `public/fonts/` | Self-hosted Instrument Serif (display) and Inter Tight (text), both SIL Open Font License. |
 | `src/stage.js` | Decides when to load the 3D: still image first, three.js after page load, opt-in with reduced motion or Data Saver, paused when off screen. |
 | `src/scene3d.js` | The three.js scene (lazy-loaded chunk). |
 | `public/img/` | Still renders of the scene (poster images) and the social preview image. |
