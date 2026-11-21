@@ -3,6 +3,8 @@
  * scroll progress and the journey chapter rail. Everything is skipped (content
  * shown immediately) when the visitor prefers reduced motion; CSS handles that.
  */
+import { journeyValue } from './lib/journey.js';
+
 function splitWords(el) {
   let i = 0;
   const walk = node => {
@@ -68,8 +70,12 @@ export function initMotion() {
     });
   }
 
-  // Header background + scroll progress.
+  // Header background, scroll progress and the chapter rail. The rail follows
+  // the same journey value as the 3D scene, so the two never disagree.
   const header = document.querySelector('.site-header');
+  const chapterLinks = [...document.querySelectorAll('.chapters a')];
+  const journeyEnd = document.getElementById('journey-end-anchor');
+  const CHAPTERS = [null, 'symptoms', 'stones', 'prostate'];
   let ticking = false;
   const onScroll = () => {
     ticking = false;
@@ -79,35 +85,26 @@ export function initMotion() {
       header.classList.toggle('is-scrolled', y > 24);
       header.style.setProperty('--progress', max > 0 ? (y / max).toFixed(4) : '0');
     }
+    if (chapterLinks.length) {
+      const j = journeyValue();
+      const inJourney = !journeyEnd || journeyEnd.getBoundingClientRect().top > window.innerHeight * 0.5;
+      const current = CHAPTERS[Math.round(j)];
+      root.classList.toggle('in-chapters', j >= 0.5 && inJourney);
+      chapterLinks.forEach(a => {
+        const active = a.dataset.chapter === current;
+        a.classList.toggle('is-active', active);
+        if (active) a.setAttribute('aria-current', 'true');
+        else a.removeAttribute('aria-current');
+      });
+    }
   };
-  window.addEventListener(
-    'scroll',
-    () => {
-      if (!ticking) {
-        ticking = true;
-        requestAnimationFrame(onScroll);
-      }
-    },
-    { passive: true }
-  );
+  const requestTick = () => {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(onScroll);
+    }
+  };
+  window.addEventListener('scroll', requestTick, { passive: true });
+  window.addEventListener('resize', requestTick, { passive: true });
   onScroll();
-
-  // Chapter rail: show while a chapter is on screen, highlight the current one.
-  const chapterLinks = [...document.querySelectorAll('.chapters a')];
-  if (chapterLinks.length && 'IntersectionObserver' in window) {
-    const visible = new Set();
-    const chapterIo = new IntersectionObserver(
-      entries => {
-        entries.forEach(e => (e.isIntersecting ? visible.add(e.target.id) : visible.delete(e.target.id)));
-        root.classList.toggle('in-chapters', visible.size > 0);
-        const current = ['prostate', 'stones', 'symptoms'].find(id => visible.has(id));
-        chapterLinks.forEach(a => a.classList.toggle('is-active', a.dataset.chapter === current));
-      },
-      { rootMargin: '-45% 0px -45% 0px' }
-    );
-    chapterLinks.forEach(a => {
-      const el = document.getElementById(a.dataset.chapter);
-      if (el) chapterIo.observe(el);
-    });
-  }
 }

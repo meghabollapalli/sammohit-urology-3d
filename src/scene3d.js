@@ -5,6 +5,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { journeyValue } from './lib/journey.js';
 
 // Deterministic PRNG for reproducible organic 3D anatomy & crystal facets
 function mulberry32(seed) {
@@ -92,7 +93,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   const pmrem = new THREE.PMREMGenerator(renderer);
   const envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
   scene.environment = envTex;
-  scene.environmentIntensity = 0.75;
+  scene.environmentIntensity = 0.6;
 
   const renderTarget = new THREE.WebGLRenderTarget(
     window.innerWidth * initialDpr,
@@ -105,9 +106,9 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
 
   const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(window.innerWidth, window.innerHeight),
-    0.42,
-    0.62,
-    0.84
+    0.24,
+    0.5,
+    0.92
   );
   if (!lowPower) composer.addPass(bloomPass);
   composer.addPass(new OutputPass());
@@ -153,16 +154,16 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   const ambientLight = new THREE.HemisphereLight(0xdbeafe, 0x1e293b, 0.65);
   scene.add(ambientLight);
 
-  const keyLight = new THREE.DirectionalLight(0xfff8f0, 2.2);
+  const keyLight = new THREE.DirectionalLight(0xfff8f0, 1.9);
   keyLight.position.set(5.5, 8.0, 6.5);
   scene.add(keyLight);
 
-  const rimLightCyan = new THREE.DirectionalLight(0x5fd4ff, 2.6);
+  const rimLightCyan = new THREE.DirectionalLight(0x5fd4ff, 1.3);
   rimLightCyan.position.set(-6.0, 4.0, -5.5);
   scene.add(rimLightCyan);
 
   // Warm back light from the other side: separates the organs from the background.
-  const rimLightWarm = new THREE.DirectionalLight(0xffb48a, 1.5);
+  const rimLightWarm = new THREE.DirectionalLight(0xffb48a, 0.9);
   rimLightWarm.position.set(6.5, 1.5, -5.0);
   scene.add(rimLightWarm);
 
@@ -336,15 +337,15 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
 
   const arteryMat = new THREE.MeshPhysicalMaterial({
     color: 0xb82032,
-    roughness: 0.24,
-    clearcoat: 0.9,
-    clearcoatRoughness: 0.12
+    roughness: 0.42,
+    clearcoat: 0.5,
+    clearcoatRoughness: 0.35
   });
   const veinMat = new THREE.MeshPhysicalMaterial({
     color: 0x26588c,
-    roughness: 0.26,
-    clearcoat: 0.88,
-    clearcoatRoughness: 0.14
+    roughness: 0.44,
+    clearcoat: 0.5,
+    clearcoatRoughness: 0.35
   });
 
   const arteryGroup = new THREE.Group();
@@ -469,19 +470,16 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   ureterGeo.setAttribute('uv', new THREE.BufferAttribute(uUVs, 2));
   ureterGeo.setIndex(uIndices);
 
+  // A see-through tube (plain alpha blending, no refraction), so the stone,
+  // scope and laser inside it are always easy to make out.
   const ureterMat = new THREE.MeshPhysicalMaterial({
     color: 0xe38886,
-    attenuationColor: new THREE.Color(0x8f2932),
-    attenuationDistance: 0.85,
-    transmission: 0.78,
-    thickness: 0.52,
-    ior: 1.38,
-    roughness: 0.10,
-    clearcoat: 1.0,
-    clearcoatRoughness: 0.06,
+    roughness: 0.38,
+    clearcoat: 0.35,
+    clearcoatRoughness: 0.4,
     transparent: true,
-    opacity: 0.86,
-    side: THREE.DoubleSide
+    opacity: 0.4,
+    depthWrite: false
   });
 
   const ureterMesh = new THREE.Mesh(ureterGeo, ureterMat);
@@ -633,8 +631,12 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     new THREE.Vector3(0.66, -3.82, 0.02),
     new THREE.Vector3(0.42, -4.28, 0.10)
   ]);
-  const stumpMat = ureterMat.clone();
-  stumpMat.opacity = 0.45;
+  const stumpMat = new THREE.MeshStandardMaterial({
+    color: 0xc97a78,
+    roughness: 0.55,
+    transparent: true,
+    opacity: 0.3
+  });
   organRoot.add(
     new THREE.Mesh(new THREE.TubeGeometry(leftUreterStump, 24, 0.11, 16, false), stumpMat)
   );
@@ -696,10 +698,10 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   organRoot.add(scopeGroup);
 
   const scopeSheathMat = new THREE.MeshPhysicalMaterial({
-    color: 0x1e293b,
-    metalness: 0.45,
-    roughness: 0.28,
-    clearcoat: 0.9
+    color: 0x8fa3b8,
+    emissive: 0x1c2a38,
+    metalness: 0.55,
+    roughness: 0.35
   });
   let scopeMesh = null;
 
@@ -730,10 +732,13 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   const laserFlashLight = new THREE.PointLight(0x22d3ee, 0, 3.4, 1.5);
   organRoot.add(laserFlashLight);
 
+  // The PCNL sheath enters through the back of the kidney and stops just
+  // short of where a kidney stone sits.
+  const pcnlTip = ureterCurve.getPointAt(0.065).add(new THREE.Vector3(0.34, 0.03, 0.05));
   const pcnlCurve = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(2.85, 3.62, 0.36),
-    new THREE.Vector3(1.82, 3.74, 0.20),
-    new THREE.Vector3(0.84, 3.86, 0.06)
+    new THREE.Vector3(2.95, 3.5, 0.36),
+    new THREE.Vector3(1.85, 3.66, 0.2),
+    pcnlTip.clone()
   ]);
   const pcnlSheathMat = new THREE.MeshStandardMaterial({
     color: 0xcbd5e1,
@@ -841,11 +846,11 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   dustGeo.setAttribute('color', new THREE.BufferAttribute(dustColors, 3));
 
   const dustMat = new THREE.PointsMaterial({
-    size: 0.068,
+    size: 0.05,
     map: createSoftParticleSprite(),
     vertexColors: true,
     transparent: true,
-    opacity: 0.92,
+    opacity: 0.6,
     depthWrite: false,
     blending: THREE.AdditiveBlending
   });
@@ -923,11 +928,10 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   // =========================================================================
   // 11. SCROLL & RESIZE HANDLERS + HUD DOM REFS
   // =========================================================================
+  // The journey value (0 hero, 1 symptoms, 2 treatment, 3 prostate) comes from
+  // the same helper as the chapter rail, so the scene always matches the text.
   function onScroll() {
-    const anchor = document.getElementById('journey-end-anchor');
-    if (!anchor) return;
-    const total = Math.max(1, anchor.offsetTop - window.innerHeight * 0.45);
-    appState.scrollTarget = Math.max(0, Math.min(1, window.scrollY / total));
+    appState.scrollTarget = journeyValue();
   }
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
@@ -941,6 +945,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     renderer.setPixelRatio(dpr);
     renderer.setSize(w, h);
     composer.setSize(w, h);
+    onScroll();
   }
   window.addEventListener('resize', onResize, { passive: true });
 
@@ -950,7 +955,6 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   // 12. MAIN 60FPS ANIMATION & 3D CHOREOGRAPHY LOOP
   // =========================================================================
   const dummyObj = new THREE.Object3D();
-  const tempVec = new THREE.Vector3();
   const camTargetLook = new THREE.Vector3();
   const clock = new THREE.Timer();
 
@@ -972,14 +976,38 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   let rafId = 0;
   let firstFrameSent = false;
 
-  // Procedure switches blend instead of cutting: the stone, instruments and
-  // camera all ease towards the new target so the anatomy stays continuous.
-  const mix = { renal: 0, scope: 1, pcnl: 0, mm: appState.stoneSizeMm };
+  // -------------------------------------------------------------------------
+  // Choreography. Everything below is a continuous function of the journey
+  // value j (0 hero, 1 symptoms, 2 treatment, 3 prostate) plus a few eased
+  // "mix" values for the pickers, so nothing in the scene ever cuts.
+  // -------------------------------------------------------------------------
+  const SITE_ORIGIN = 0.02; // stone starts in the renal pelvis
+  const SITE_URETER = 0.28; // stuck in the upper ureter (treated by URSL)
+  const SITE_KIDNEY = 0.065; // stays in the kidney (treated by RIRS or PCNL)
+  const PROSTATE_FOCUS = new THREE.Vector3(0.15, -5.45, 0);
+  const PCNL_TIP = pcnlTip;
+  const UP = new THREE.Vector3(0, 1, 0);
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const clamp01 = x => Math.max(0, Math.min(1, x));
+
+  const mix = { renal: 0, scope: 1, pcnl: 0, mm: Math.min(16, appState.stoneSizeMm) };
   const camPosSmooth = new THREE.Vector3();
   const camLookSmooth = new THREE.Vector3();
   const camPosGoal = new THREE.Vector3();
-  let camPrimed = false;
+  const focus = new THREE.Vector3();
+  const tractPt = new THREE.Vector3();
+  const beamDir = new THREE.Vector3();
+  let primed = false;
   let lastElapsed = 0;
+  let frameCount = 0;
+  const kidneyBaseOpacity = kidneyCortexMat.opacity;
+
+  // A point that travels down the urinary tract: along the ureter, then into
+  // the bladder and on to the prostate. Used for the camera's last leg.
+  function tractPoint(w, out) {
+    if (w < 0.8) return out.copy(ureterCurve.getPointAt(lerp(0.2, 1, w / 0.8)));
+    return out.copy(ureterCurve.getPointAt(1)).lerp(PROSTATE_FOCUS, smoothstep(0.8, 1, w));
+  }
 
   function animate() {
     if (!running) return;
@@ -987,18 +1015,32 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
 
     clock.update();
     const elapsed = clock.getElapsed();
-    filmPass.uniforms.uTime.value = elapsed;
-    appState.scrollCurrent += (appState.scrollTarget - appState.scrollCurrent) * 0.09;
-    const p = appState.scrollCurrent;
     const dt = Math.min(0.1, Math.max(0, elapsed - lastElapsed));
     lastElapsed = elapsed;
+    filmPass.uniforms.uTime.value = elapsed;
+
+    // Layout can shift after fonts load, so refresh the target now and then.
+    if (frameCount++ % 30 === 0) onScroll();
+    if (!primed) appState.scrollCurrent = appState.scrollTarget;
+    appState.scrollCurrent += (appState.scrollTarget - appState.scrollCurrent) * (1 - Math.exp(-dt * 5));
+    const j = appState.scrollCurrent;
+
     const ease = 1 - Math.exp(-dt * 3.2);
-    const renalGoal = appState.modality === 'ursl' ? 0 : 1;
-    mix.renal += (renalGoal - mix.renal) * (1 - Math.exp(-dt * 2.2));
+    mix.renal += ((appState.modality === 'ursl' ? 0 : 1) - mix.renal) * (1 - Math.exp(-dt * 2.4));
     mix.scope += ((appState.modality === 'pcnl' ? 0 : 1) - mix.scope) * ease;
     mix.pcnl += ((appState.modality === 'pcnl' ? 1 : 0) - mix.pcnl) * ease;
     mix.mm += (Math.min(16, appState.stoneSizeMm) - mix.mm) * ease;
     const renalMix = mix.renal * mix.renal * (3 - 2 * mix.renal);
+
+    // Timeline.
+    const travel = smoothstep(0.35, 1.35, j);
+    const symptomPulse = smoothstep(0.45, 0.9, j) * (1 - smoothstep(1.45, 1.9, j));
+    const treat = smoothstep(1.4, 1.85, j) * (1 - smoothstep(2.5, 2.85, j));
+    const laserOn = smoothstep(1.85, 1.97, j) * (1 - smoothstep(2.42, 2.52, j));
+    const erosion = smoothstep(2.1, 2.5, j);
+    const dustProgress = smoothstep(2.08, 2.6, j);
+    const flushProgress = clamp01((j - 2.45) / 0.55);
+    const prostateFocus = smoothstep(2.6, 3.0, j);
 
     const heartWave = Math.pow(Math.max(0, Math.sin(elapsed * 3.55)), 4);
     arteryGroup.scale.setScalar(1 + heartWave * 0.025);
@@ -1006,57 +1048,18 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
 
     appState.userYawCurrent += (appState.userYawTarget - appState.userYawCurrent) * 0.10;
     appState.userPitchCurrent += (appState.userPitchTarget - appState.userPitchCurrent) * 0.10;
-
-    const autoScrollYaw = Math.sin(p * Math.PI * 1.65) * 0.32;
-    organRoot.rotation.y = autoScrollYaw + appState.userYawCurrent;
+    organRoot.rotation.y = Math.sin(j * 1.25) * 0.14 * (1 - treat) + appState.userYawCurrent;
     organRoot.rotation.x = appState.userPitchCurrent;
 
-    let erosion = 0;
-    let laserIntensity = 0;
-    let dustProgress = 0;
-    let flushProgress = 0;
-    let symptomPulse = 0;
-
-    // Where the stone sits for a given mix of ureter (0) and kidney (1) target.
-    const stoneUFor = r => {
-      if (p <= 0.14) return 0.015 + (p / 0.14) * 0.055;
-      if (p <= 0.50) {
-        const t = (p - 0.14) / 0.36;
-        const eased = Math.max(0, Math.min(1, t + 0.032 * Math.sin(t * Math.PI * 3)));
-        return 0.07 + eased * (0.67 + (0.04 - 0.67) * r);
-      }
-      if (p <= 0.75) {
-        const u = 0.74 + ((p - 0.50) / 0.25) * 0.025;
-        return u + (0.065 - u) * r;
-      }
-      return 0.765 + (0.065 - 0.765) * r;
-    };
-
-    if (p > 0.14 && p <= 0.50) {
-      symptomPulse = Math.sin(((p - 0.14) / 0.36) * Math.PI);
-    } else if (p > 0.50 && p <= 0.75) {
-      const t = (p - 0.50) / 0.25;
-      laserIntensity = Math.sin(Math.min(1, t * 1.15) * Math.PI);
-      erosion = smoothstep(0.10, 0.90, t);
-      dustProgress = smoothstep(0.08, 0.96, t);
-      symptomPulse = Math.max(0, (1 - t * 2.5) * 0.45);
-    } else if (p > 0.75) {
-      erosion = 1.0;
-      dustProgress = 1.0;
-      flushProgress = (p - 0.75) / 0.25;
-    }
-
-    // On a procedure switch the camera and scope glide along the urinary tract
-    // (pathU), while the stone shrinks away at its old site and grows back at
-    // the new one, so nothing ever teleports.
+    // Stone. On a procedure switch the scope glides along the tract (pathU)
+    // while the stone shrinks away at its old site and grows back at the new
+    // one. Both sites sit inside the same camera frame.
+    const stoneUFor = r => lerp(SITE_ORIGIN, lerp(SITE_URETER, SITE_KIDNEY, r), travel);
     const pathU = stoneUFor(renalMix);
     const stoneU = stoneUFor(renalMix < 0.5 ? 0 : 1);
     const swapScale = Math.min(1, Math.abs(renalMix * 2 - 1) * 1.6);
-    const focusPoint = ureterCurve.getPointAt(Math.min(1, pathU));
-
-    const stoneCenter = ureterCurve.getPointAt(Math.min(1, stoneU));
-    const clampedMm = Math.min(16, mix.mm);
-    const baseStoneRadius = 0.108 + (clampedMm - 4) * 0.0095;
+    const stoneCenter = ureterCurve.getPointAt(stoneU);
+    const baseStoneRadius = 0.108 + (mix.mm - 4) * 0.0095;
     const intactScale = Math.max(0, 1 - erosion * 0.95) * swapScale;
     const activeStoneRadius = baseStoneRadius * intactScale;
 
@@ -1064,36 +1067,24 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
       stoneMesh.visible = true;
       stoneMesh.position.copy(stoneCenter);
       stoneMesh.scale.setScalar(activeStoneRadius);
-      stoneMesh.rotation.set(
-        p * 8.5 + elapsed * 0.45,
-        p * 12.0 + elapsed * 0.62,
-        p * 5.2
-      );
-      if (laserIntensity > 0.1) {
-        stoneMat.emissive.setHex(0x38bdf8);
-        stoneMat.emissiveIntensity = 0.8 + laserIntensity * 1.6;
-      } else {
-        stoneMat.emissive.setHex(0x7c3a04);
-        stoneMat.emissiveIntensity = 0.72 + symptomPulse * 0.5;
-      }
-
-      stoneLight.position.copy(stoneCenter).add(new THREE.Vector3(0, 0, 0.25));
-      stoneLight.color.setHex(symptomPulse > 0.25 ? 0xf97316 : 0xf59e0b);
-      stoneLight.intensity = (1.3 + symptomPulse * 1.8) * intactScale;
+      stoneMesh.rotation.set(j * 2.6 + elapsed * 0.3, j * 3.4 + elapsed * 0.4, j * 1.8);
+      stoneMat.emissiveIntensity = 0.4 + symptomPulse * 0.25 + laserOn * 0.2;
+      stoneLight.position.copy(stoneCenter);
+      stoneLight.position.z += 0.3;
+      stoneLight.intensity = (0.3 + symptomPulse * 0.45) * intactScale;
     } else {
       stoneMesh.visible = false;
       stoneLight.intensity = 0;
     }
 
     spasmRings.forEach((ring, idx) => {
-      if (symptomPulse > 0.04) {
+      if (symptomPulse > 0.04 && swapScale > 0.5) {
         ring.visible = true;
         const phase = (elapsed * 0.75 + idx * 0.33) % 1;
-        const scale = 0.18 + phase * 0.58;
         ring.position.copy(stoneCenter);
-        ring.scale.setScalar(scale);
+        ring.scale.setScalar(0.18 + phase * 0.58);
         ring.rotation.x = Math.PI * 0.42;
-        ring.material.opacity = (1 - phase) * 0.52 * symptomPulse * swapScale;
+        ring.material.opacity = (1 - phase) * 0.45 * symptomPulse * swapScale;
       } else {
         ring.visible = false;
       }
@@ -1101,85 +1092,59 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
 
     updateUreterDeformation(stoneU, activeStoneRadius, intactScale, elapsed);
 
+    // Fade the kidney's outer shell while treating inside it, so the stone and
+    // instruments stay visible.
+    kidneyCortexMat.opacity = kidneyBaseOpacity - (kidneyBaseOpacity - 0.34) * treat * renalMix;
+    kidneyCortexMat.thickness = lerp(1.95, 0.15, treat * renalMix);
+
+    // Instruments.
     laserBeamMesh.visible = false;
     plasmaFlashMesh.visible = false;
     laserFlashLight.intensity = 0;
     scopeHeadlamp.intensity = 0;
-    pcnlSheathMesh.visible = false;
 
-    let scopeShown = false;
-    if (mix.scope > 0.02 && p > 0.41 && p < 0.83) {
-      scopeShown = true;
-      const enter = smoothstep(0.41, 0.51, p);
-      const retract = p > 0.73 ? 1 - smoothstep(0.73, 0.82, p) : 1;
-      const reach = enter * retract * mix.scope;
-      const desiredTipU = Math.min(0.99, pathU + 0.055);
-      const currentTipU = 1.07 - (1.07 - desiredTipU) * reach;
+    const pulse = 0.6 + 0.4 * Math.sin(elapsed * 38.0);
+    const canFire = laserOn > 0.05 && intactScale > 0.04 && swapScale > 0.9;
+    let laserFrom = null;
 
-      const scopeInfo = rebuildScopeTube(currentTipU);
-      if (scopeInfo && reach > 0.78 && appState.modality !== 'pcnl') {
-        scopeHeadlamp.intensity = 2.2 * reach;
-
-        if (laserIntensity > 0.05 && intactScale > 0.04) {
-          const pulse = 0.6 + 0.4 * Math.sin(elapsed * 38.0);
-          const beamVec = tempVec.subVectors(stoneCenter, scopeInfo.tipPos);
-          const dist = beamVec.length();
-
-          laserBeamMesh.visible = true;
-          laserBeamMesh.position.copy(scopeInfo.tipPos);
-          laserBeamMesh.scale.set(1, dist, 1);
-          laserBeamMesh.quaternion.setFromUnitVectors(
-            new THREE.Vector3(0, 1, 0),
-            beamVec.clone().normalize()
-          );
-          laserBeamMat.opacity = 0.88 * laserIntensity * pulse;
-
-          plasmaFlashMesh.visible = true;
-          plasmaFlashMesh.position
-            .copy(stoneCenter)
-            .add(new THREE.Vector3(0, -activeStoneRadius * 0.65, 0));
-          plasmaFlashMesh.scale.setScalar((0.7 + pulse * 0.7) * laserIntensity);
-          plasmaFlashMesh.material.opacity = 0.92 * laserIntensity;
-
-          laserFlashLight.position.copy(plasmaFlashMesh.position);
-          laserFlashLight.intensity = 4.2 * laserIntensity * pulse;
-        }
+    const scopeReach = treat * mix.scope;
+    if (scopeReach > 0.01) {
+      const desiredTipU = Math.min(0.99, pathU + 0.05);
+      const scopeInfo = rebuildScopeTube(1.07 - (1.07 - desiredTipU) * scopeReach);
+      if (scopeInfo && scopeReach > 0.9) {
+        scopeHeadlamp.intensity = 0.55;
+        if (appState.modality !== 'pcnl') laserFrom = scopeInfo.tipPos;
       }
-    }
-    if (!scopeShown) rebuildScopeTube(1.1);
-    if (mix.pcnl > 0.02 && p > 0.42 && p < 0.82) {
-      const enter = smoothstep(0.42, 0.50, p);
-      const retract = p > 0.73 ? 1 - smoothstep(0.73, 0.81, p) : 1;
-      const reach = enter * retract * mix.pcnl;
-      pcnlSheathMesh.visible = reach > 0.05;
-      pcnlSheathMesh.position.x = (1 - reach) * 1.6;
-
-      if (reach > 0.82 && laserIntensity > 0.05 && intactScale > 0.04) {
-        const pulse = 0.6 + 0.4 * Math.sin(elapsed * 38.0);
-        const pcnlTip = new THREE.Vector3(0.84, 3.86, 0.06);
-        const beamVec = tempVec.subVectors(stoneCenter, pcnlTip);
-        const dist = beamVec.length();
-
-        laserBeamMesh.visible = true;
-        laserBeamMesh.position.copy(pcnlTip);
-        laserBeamMesh.scale.set(1.2, dist, 1.2);
-        laserBeamMesh.quaternion.setFromUnitVectors(
-          new THREE.Vector3(0, 1, 0),
-          beamVec.clone().normalize()
-        );
-        laserBeamMat.opacity = 0.9 * laserIntensity * pulse;
-
-        plasmaFlashMesh.visible = true;
-        plasmaFlashMesh.position.copy(stoneCenter);
-        plasmaFlashMesh.scale.setScalar((0.8 + pulse * 0.7) * laserIntensity);
-        plasmaFlashMesh.material.opacity = 0.94 * laserIntensity;
-
-        laserFlashLight.position.copy(stoneCenter);
-        laserFlashLight.intensity = 4.4 * laserIntensity * pulse;
-      }
+    } else {
+      rebuildScopeTube(1.1);
     }
 
-    const burstOriginU = 0.75 + (0.07 - 0.75) * renalMix;
+    const pcnlReach = treat * mix.pcnl;
+    pcnlSheathMesh.visible = pcnlReach > 0.03;
+    pcnlSheathMesh.position.x = (1 - pcnlReach) * 1.8;
+    if (pcnlReach > 0.9 && appState.modality === 'pcnl') laserFrom = PCNL_TIP;
+
+    if (laserFrom && canFire) {
+      beamDir.subVectors(stoneCenter, laserFrom);
+      const dist = beamDir.length();
+      laserBeamMesh.visible = true;
+      laserBeamMesh.position.copy(laserFrom);
+      laserBeamMesh.scale.set(1.6, dist, 1.6);
+      laserBeamMesh.quaternion.setFromUnitVectors(UP, beamDir.normalize());
+      laserBeamMat.opacity = 0.85 * laserOn * pulse;
+
+      plasmaFlashMesh.visible = true;
+      plasmaFlashMesh.position.copy(stoneCenter).addScaledVector(beamDir, -activeStoneRadius * 0.8);
+      plasmaFlashMesh.scale.setScalar((0.3 + pulse * 0.22) * laserOn);
+      plasmaFlashMesh.material.opacity = 0.75 * laserOn;
+
+      laserFlashLight.position.copy(plasmaFlashMesh.position);
+      laserFlashLight.intensity = 0.9 * laserOn * pulse;
+    }
+
+    // Fragments and dust wash down the tract after treatment.
+    const burstOriginU = lerp(SITE_URETER, SITE_KIDNEY, renalMix);
+    const spanScale = lerp(0.6, 0.72, renalMix);
     const showBurst = dustProgress > 0.01;
     shardInstanced.visible = showBurst && flushProgress < 0.55;
     if (shardInstanced.visible) {
@@ -1190,17 +1155,9 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
         if (localT <= 0 || shrink <= 0.01) {
           dummyObj.scale.setScalar(0.0001);
         } else {
-          const burstDist = localT * 0.22;
-          const driftU = Math.min(0.99, burstOriginU + localT * 0.18);
-          const basePt = ureterCurve.getPointAt(driftU);
-          dummyObj.position
-            .copy(basePt)
-            .addScaledVector(s.dir, burstDist * 0.48);
-          dummyObj.rotation.set(
-            elapsed * s.rotSpeed.x,
-            elapsed * s.rotSpeed.y,
-            elapsed * s.rotSpeed.z
-          );
+          const driftU = Math.min(0.99, burstOriginU + localT * 0.14);
+          dummyObj.position.copy(ureterCurve.getPointAt(driftU)).addScaledVector(s.dir, localT * 0.1);
+          dummyObj.rotation.set(elapsed * s.rotSpeed.x, elapsed * s.rotSpeed.y, elapsed * s.rotSpeed.z);
           dummyObj.scale.setScalar(s.scale * shrink);
         }
         dummyObj.updateMatrix();
@@ -1216,16 +1173,14 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
 
       for (let i = 0; i < DUST_COUNT; i++) {
         const m = dustMeta[i];
-        const travel =
-          (dustProgress * 0.55 + flushProgress * 1.15) * m.speed - m.offset * 0.42;
+        const dustTravel = (dustProgress * 0.4 + flushProgress * 1.3) * m.speed - m.offset * 0.42;
 
-        if (travel <= 0) {
+        if (dustTravel <= 0) {
           dustPos[i * 3 + 1] = -999;
           continue;
         }
 
-        const spanScale = 0.36 + (0.85 - 0.36) * renalMix;
-        const uTrack = burstOriginU + travel * spanScale;
+        const uTrack = burstOriginU + dustTravel * spanScale;
         if (uTrack <= 1.0) {
           const idxRing = Math.min(U_RINGS, Math.floor(uTrack * U_RINGS));
           const cPt = ureterCenters[idxRing];
@@ -1267,65 +1222,37 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
 
     bladderFluidMesh.position.y = Math.sin(elapsed * 1.9) * 0.025;
     bladderFluidMesh.rotation.y = elapsed * 0.35;
-    const prostateFocus = smoothstep(0.76, 0.92, p);
     prostateMat.emissive.setHex(prostateFocus > 0.2 ? 0x164e63 : 0x24080e);
     prostateMat.emissiveIntensity = 0.35 + prostateFocus * (0.45 + 0.2 * Math.sin(elapsed * 3.0));
 
-    const isDesktop = window.innerWidth >= 900;
+    // Camera: one continuous path. Kidney (hero), kidney with upper ureter
+    // (symptoms and treatment share almost the same frame, and it does not
+    // change with the procedure), then down the ureter to bladder and prostate.
+    const e01 = smoothstep(0, 1, j);
+    const e12 = smoothstep(1, 2, j);
+    const e23 = smoothstep(2.4, 3, j);
+    focus.set(lerp(lerp(0.65, 0.7, e01), 0.75, e12), lerp(lerp(4.15, 3.4, e01), 2.75, e12), 0);
+    if (e23 > 0) focus.lerp(tractPoint(e23, tractPt), smoothstep(0, 0.3, e23));
+    const camDist = lerp(lerp(lerp(6.2, 6.6, e01), 7.4, e12), 5.9, e23) - Math.sin(e23 * Math.PI) * 0.5;
+    const camElev = lerp(lerp(lerp(0.35, 0.25, e01), 0.15, e12), 0.18, e23);
+    const sway = Math.sin(j * 1.25) * 0.3 * (1 - treat);
 
-    let focusY, focusX, camDist, camElevOffset;
-    if (p < 0.14) {
-      const k = p / 0.14;
-      focusX = 0.65 - k * 0.35;
-      focusY = 4.15 - k * 0.65;
-      camDist = 6.2 - k * 0.5;
-      camElevOffset = 0.35;
-    } else if (p < 0.50) {
-      focusX = focusPoint.x;
-      focusY = focusPoint.y;
-      camDist = 5.4;
-      camElevOffset = 0.25;
-    } else if (p < 0.75) {
-      const mZoom = Math.sin(((p - 0.50) / 0.25) * Math.PI);
-      // Inside the kidney (RIRS, PCNL) stay further back so the whole organ
-      // stays in frame; in the ureter (URSL) move in close to the stone.
-      focusX = focusPoint.x + 0.25 * renalMix;
-      focusY = focusPoint.y - 0.15 + 0.55 * renalMix;
-      camDist = 5.3 - mZoom * (1.35 - 0.9 * renalMix) + 1.35 * renalMix;
-      camElevOffset = -0.25 * mZoom + (0.22 + 0.25 * mZoom) * renalMix;
-    } else {
-      const b = (p - 0.75) / 0.25;
-      focusX = 0.15;
-      focusY = -3.4 - smoothstep(0, 0.75, b) * 2.15;
-      camDist = 5.4 + b * 0.55;
-      camElevOffset = 0.18;
-    }
-
-    if (isDesktop) {
+    if (window.innerWidth >= 900) {
       const desktopShiftX = -1.65 * (camDist / 5.8);
-      camPosGoal.set(
-        focusX + desktopShiftX + Math.sin(p * 3.2) * 0.45,
-        focusY + camElevOffset,
-        camDist
-      );
-      camTargetLook.set(focusX + desktopShiftX, focusY, 0);
+      camPosGoal.set(focus.x + desktopShiftX + sway, focus.y + camElev, camDist);
+      camTargetLook.set(focus.x + desktopShiftX, focus.y, 0);
     } else {
       // Portrait phones: pull back and lift the anatomy into the top part of
       // the screen so the text cards below never cover it.
       const portrait = Math.min(1, Math.max(0, (0.9 - camera.aspect) / 0.45));
       const mobileShiftY = -(0.58 + 1.0 * portrait) * (camDist / 5.6);
-      camPosGoal.set(
-        focusX + Math.sin(p * 3.0) * 0.38,
-        focusY + mobileShiftY + camElevOffset,
-        camDist * (1.06 + 0.75 * portrait)
-      );
-      camTargetLook.set(focusX, focusY + mobileShiftY, 0);
+      camPosGoal.set(focus.x + sway, focus.y + mobileShiftY + camElev, camDist * (1.06 + 0.75 * portrait));
+      camTargetLook.set(focus.x, focus.y + mobileShiftY, 0);
     }
-    // Light damping so any remaining change of target glides rather than cuts.
-    if (!camPrimed) {
+    if (!primed) {
       camPosSmooth.copy(camPosGoal);
       camLookSmooth.copy(camTargetLook);
-      camPrimed = true;
+      primed = true;
     } else {
       const k = 1 - Math.exp(-dt * 6);
       camPosSmooth.lerp(camPosGoal, k);
