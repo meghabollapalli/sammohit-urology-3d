@@ -48,9 +48,32 @@ function clinicHtml() {
   };
 }
 
+/** Preload the two fonts the first screen uses (hashed names are only known after bundling). */
+function preloadFonts() {
+  return {
+    name: 'preload-fonts',
+    enforce: 'post',
+    transformIndexHtml(html, ctx) {
+      if (!ctx.bundle) return html;
+      const wanted = ['instrument-serif-', 'inter-tight-'];
+      const files = Object.keys(ctx.bundle).filter(
+        f => f.endsWith('.woff2') && wanted.some(w => f.split('/').pop().startsWith(w)) && !f.includes('italic')
+      );
+      return {
+        html,
+        tags: files.map(f => ({
+          tag: 'link',
+          attrs: { rel: 'preload', as: 'font', type: 'font/woff2', href: `./${f}`, crossorigin: '' },
+          injectTo: 'head'
+        }))
+      };
+    }
+  };
+}
+
 export default defineConfig({
   base: './',
-  plugins: [clinicFixtureSwap(), clinicHtml()],
+  plugins: [clinicFixtureSwap(), clinicHtml(), preloadFonts()],
   test: { include: ['tests/unit/**/*.test.js'] },
   build: {
     target: 'es2020',
