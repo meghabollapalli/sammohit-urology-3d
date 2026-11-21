@@ -20,8 +20,15 @@ function smoothstep(edge0, edge1, x) {
   return t * t * (3 - 2 * t);
 }
 
-export function initUrology3DScene() {
-  const container = document.getElementById('webgl-container');
+/**
+ * Builds the scroll-driven urinary-tract scene inside `container`.
+ * @param {object} opts
+ * @param {HTMLElement} opts.container element the canvas is appended to
+ * @param {boolean} [opts.lowPower] phones / low-memory devices: lower pixel
+ *   density, no bloom, fewer particles
+ * @param {() => void} [opts.onFirstFrame] called once the first frame is drawn
+ */
+export function initUrology3DScene({ container, lowPower = false, onFirstFrame } = {}) {
   if (!container) return null;
 
   const appState = {
@@ -40,14 +47,16 @@ export function initUrology3DScene() {
   // 1. RENDERER, SCENE, CAMERA & HDR STUDIO POST-PROCESSING
   // =========================================================================
   const renderer = new THREE.WebGLRenderer({
-    antialias: true,
-    powerPreference: 'high-performance'
+    antialias: false,
+    powerPreference: lowPower ? 'default' : 'high-performance'
   });
-  const initialDpr = Math.min(window.devicePixelRatio || 1, 2);
+  const MAX_DPR = lowPower ? 1.5 : 2;
+  const initialDpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
   renderer.setPixelRatio(initialDpr);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.06;
+  renderer.domElement.setAttribute('aria-hidden', 'true');
   container.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
@@ -72,7 +81,7 @@ export function initUrology3DScene() {
   const renderTarget = new THREE.WebGLRenderTarget(
     window.innerWidth * initialDpr,
     window.innerHeight * initialDpr,
-    { type: THREE.HalfFloatType, samples: 4 }
+    { type: THREE.HalfFloatType, samples: lowPower ? 2 : 4 }
   );
   const composer = new EffectComposer(renderer, renderTarget);
   const renderPass = new RenderPass(scene, camera);
@@ -84,7 +93,7 @@ export function initUrology3DScene() {
     0.45,
     0.88
   );
-  composer.addPass(bloomPass);
+  if (!lowPower) composer.addPass(bloomPass);
   composer.addPass(new OutputPass());
 
   // =========================================================================
@@ -756,7 +765,7 @@ export function initUrology3DScene() {
     });
   }
 
-  const DUST_COUNT = 900;
+  const DUST_COUNT = lowPower ? 300 : 900;
   const dustGeo = new THREE.BufferGeometry();
   const dustPos = new Float32Array(DUST_COUNT * 3);
   const dustColors = new Float32Array(DUST_COUNT * 3);
@@ -788,7 +797,7 @@ export function initUrology3DScene() {
   organRoot.add(dustPoints);
 
   const bokehGeo = new THREE.BufferGeometry();
-  const bokehCount = 90;
+  const bokehCount = lowPower ? 40 : 90;
   const bokehArr = new Float32Array(bokehCount * 3);
   for (let i = 0; i < bokehCount; i++) {
     bokehArr[i * 3] = (pRand() - 0.5) * 14;
@@ -870,7 +879,7 @@ export function initUrology3DScene() {
   function onResize() {
     const w = window.innerWidth;
     const h = window.innerHeight;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     renderer.setPixelRatio(dpr);
@@ -879,10 +888,6 @@ export function initUrology3DScene() {
   }
   window.addEventListener('resize', onResize, { passive: true });
 
-  const hudDot = document.getElementById('hud-dot');
-  const hudStage = document.getElementById('hud-stage');
-  const hudMetric = document.getElementById('hud-metric');
-  const railFill = document.getElementById('tract-rail-fill');
 
   function applyStudioTheme(themeName) {
     appState.theme = themeName;
@@ -903,12 +908,18 @@ export function initUrology3DScene() {
   const dummyObj = new THREE.Object3D();
   const tempVec = new THREE.Vector3();
   const camTargetLook = new THREE.Vector3();
-  const clock = new THREE.Clock();
+  const clock = new THREE.Timer();
+
+  let running = false;
+  let rafId = 0;
+  let firstFrameSent = false;
 
   function animate() {
-    requestAnimationFrame(animate);
+    if (!running) return;
+    rafId = requestAnimationFrame(animate);
 
-    const elapsed = clock.getElapsedTime();
+    clock.update();
+    const elapsed = clock.getElapsed();
     appState.scrollCurrent += (appState.scrollTarget - appState.scrollCurrent) * 0.09;
     const p = appState.scrollCurrent;
 
@@ -1206,48 +1217,41 @@ export function initUrology3DScene() {
       );
       camTargetLook.set(focusX + desktopShiftX, focusY, 0);
     } else {
-      const mobileShiftY = -0.58 * (camDist / 5.6);
+      // Portrait phones: pull back and lift the anatomy into the top part of
+      // the screen so the text cards below never cover it.
+      const portrait = Math.min(1, Math.max(0, (0.9 - camera.aspect) / 0.45));
+      const mobileShiftY = -(0.58 + 1.0 * portrait) * (camDist / 5.6);
       camera.position.set(
         focusX + Math.sin(p * 3.0) * 0.38,
         focusY + mobileShiftY + camElevOffset,
-        camDist * 1.06
+        camDist * (1.06 + 0.75 * portrait)
       );
       camTargetLook.set(focusX, focusY + mobileShiftY, 0);
     }
     camera.lookAt(camTargetLook);
 
-    if (railFill) railFill.style.height = (p * 100).toFixed(1) + '%';
-    if (hudStage && hudMetric && hudDot) {
-      hudMetric.textContent = (p * 26.0).toFixed(1) + ' cm';
-      if (p < 0.14) {
-        hudStage.textContent = '3D Kidney · Renal Pelvis';
-        hudDot.style.backgroundColor = 'hsl(36, 92%, 56%)';
-      } else if (p < 0.32) {
-        hudStage.textContent = isRenalTarget ? 'Intrarenal Calyx' : 'UPJ Narrowing';
-        hudDot.style.backgroundColor = 'hsl(18, 88%, 56%)';
-      } else if (p < 0.50) {
-        hudStage.textContent = isRenalTarget ? 'Renal Pelvis Target' : 'Mid-Ureter · Iliac Arch';
-        hudDot.style.backgroundColor = 'hsl(11, 82%, 60%)';
-      } else if (p < 0.75) {
-        hudStage.textContent =
-          appState.modality === 'rirs'
-            ? 'RIRS Flexible Kidney Laser'
-            : appState.modality === 'pcnl'
-            ? 'Mini-PCNL Keyhole Clearance'
-            : 'URSL Holmium Laser Dusting';
-        hudDot.style.backgroundColor = 'hsl(190, 78%, 50%)';
-      } else {
-        hudStage.textContent = 'Bladder & Prostate (HoLEP · TURP)';
-        hudDot.style.backgroundColor = 'hsl(168, 76%, 44%)';
-      }
-    }
-
     composer.render();
+    if (!firstFrameSent) {
+      firstFrameSent = true;
+      if (onFirstFrame) onFirstFrame();
+    }
   }
 
-  animate();
+  function start() {
+    if (running) return;
+    running = true;
+    rafId = requestAnimationFrame(animate);
+  }
+  function stop() {
+    running = false;
+    cancelAnimationFrame(rafId);
+  }
+
+  start();
 
   return {
+    start,
+    stop,
     setStoneSize(mm) {
       appState.stoneSizeMm = mm;
     },

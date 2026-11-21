@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://meghabollapalli.github.io/sammohit-urology-3d/sitemap.xml
