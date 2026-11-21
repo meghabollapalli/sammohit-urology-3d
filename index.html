@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sammohit's Urology &amp; Andrology Center | Dr. G SVS Sammohit (M.S, M.Ch Urology)</title>
+  <meta name="description" content="Sammohit's Urology and Andrology Center led by Dr. G SVS Sammohit (M.S General Surgery, M.Ch Urology). Over 1,000+ procedures in RIRS, PCNL, URSL, HoLEP, TURP, and confidential Men's Sexual Health (ED, Premature Ejaculation &amp; Andrology)." />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <!-- Fixed Full-Viewport Three.js WebGL 3D Stage -->
+  <div id="webgl-container" aria-label="Interactive 3D anatomical kidney, ureter, stone, laser, bladder, and prostate visualization"></div>
+
+  <!-- Top Executive Navigation Header -->
+  <header class="site-header">
+    <a href="#top" class="brand" id="brand-home-link">
+      <div class="brand-monogram" aria-hidden="true">GS</div>
+      <div class="brand-text">
+        <span class="brand-name">Sammohit’s Urology &amp; Andrology</span>
+        <span class="brand-sub">Dr. G SVS Sammohit · M.S, M.Ch (Urology)</span>
+      </div>
+    </a>
+
+    <div class="header-actions">
+      <nav class="nav-links" aria-label="Primary sections">
+        <a href="#stage-laser" id="nav-procedures">RIRS · PCNL · URSL</a>
+        <a href="#stage-clearance" id="nav-prostate">HoLEP · TURP</a>
+        <a href="#andrology-clinic" id="nav-andrology">Men’s Sexual Health</a>
+        <a href="https://maps.app.goo.gl/YMChaGH4DkSuD63o9?g_st=ic" target="_blank" rel="noopener noreferrer" id="nav-location">Clinic Map ↗</a>
+      </nav>
+      <button type="button" id="auto-tour-btn" class="btn btn-ghost btn-sm" aria-label="Play 3D anatomical tour">
+        ▶ Tour
+      </button>
+      <button type="button" id="theme-toggle-btn" class="btn btn-ghost btn-sm" aria-label="Switch 3D studio lighting">
+        Light 3D
+      </button>
+      <a href="https://maps.app.goo.gl/YMChaGH4DkSuD63o9?g_st=ic" target="_blank" rel="noopener noreferrer" id="header-map-btn" class="btn btn-gold btn-sm">
+        Directions ↗
+      </a>
+      <a href="#book-visit" id="header-book-btn" class="btn btn-primary btn-sm">
+        Book Visit
+      </a>
+    </div>
+  </header>
+
+  <!-- Live 3D Anatomical Depth HUD -->
+  <aside class="anatomy-hud" aria-live="polite">
+    <span id="hud-dot" class="hud-dot"></span>
+    <span id="hud-stage" class="hud-stage">3D Kidney · Renal Pelvis</span>
+    <span id="hud-metric" class="hud-metric">0.0 cm</span>
+  </aside>
+
+  <!-- Touch 3D Orbit Hint -->
+  <div class="orbit-hint">Swipe ↔ to Rotate 3D</div>
+
+  <!-- Right-Margin Scroll Depth Rail -->
+  <div class="tract-rail" aria-hidden="true">
+    <div class="tract-rail-track">
+      <div id="tract-rail-fill" class="tract-rail-fill"></div>
+    </div>
+  </div>
+
+  <!-- Scrolling Clinical Storyline -->
+  <main id="top" class="story-main">
+    <!-- STAGE 0: HERO (Kidney & Renal Pelvis) -->
+    <section class="story-section hero-section" id="stage-formation">
+      <article class="clinical-card">
+        <span class="doctor-kicker">Dr. G SVS Sammohit · M.S (Gen. Surgery), M.Ch (Urology)</span>
+        <h1>Precision Laser Urology &amp; Confidential Andrology</h1>
+        <p class="lead-copy">
+          Welcome to <strong>Sammohit’s Urology and Andrology Center</strong>. Scroll down to follow a 3D kidney stone from the renal pelvis into zero-cut Holmium laser dusting—backed by over <strong>1,000+ successful procedures</strong>.
+        </p>
+
+        <div class="credential-bar">
+          <div>
+            <span class="cred-val">1,000+</span>
+            <span class="cred-lbl">Successful Surgeries</span>
+          </div>
+          <div>
+            <span class="cred-val">M.Ch</span>
+            <span class="cred-lbl">Urologist &amp; Andrologist</span>
+          </div>
+          <div>
+            <span class="cred-val">Scarless</span>
+            <span class="cred-lbl">RIRS · URSL · HoLEP</span>
+          </div>
+        </div>
+
+        <div class="cta-row">
+          <a href="#book-visit" id="hero-urgent-cta" class="btn btn-primary">
+            Book Consultation
+          </a>
+          <a href="#andrology-clinic" id="hero-andrology-cta" class="btn btn-ghost">
+            Men’s Sexual Health
+          </a>
+          <a href="https://maps.app.goo.gl/YMChaGH4DkSuD63o9?g_st=ic" target="_blank" rel="noopener noreferrer" id="hero-maps-cta" class="btn btn-gold">
+            Google Maps ↗
+          </a>
+        </div>
+
+        <!-- Live 3D Stone Diameter Simulator -->
+        <div class="control-panel">
+          <div class="control-header">
+            <span>Select Stone Size for Surgical Protocol</span>
+            <span>Live 3D Scale</span>
+          </div>
+          <div class="size-grid" role="group" aria-label="Select kidney stone diameter in millimeters">
+            <button type="button" id="size-btn-4" class="size-btn" data-mm="4">4 mm</button>
+            <button type="button" id="size-btn-8" class="size-btn active" data-mm="8">8 mm</button>
+            <button type="button" id="size-btn-14" class="size-btn" data-mm="14">14 mm</button>
+            <button type="button" id="size-btn-22" class="size-btn" data-mm="22">22 mm+</button>
+          </div>
+          <p id="stone-size-readout" class="size-readout">
+            <strong>8 mm Calculus — URSL / RIRS Candidate:</strong> Frequently impacts in the ureter or lower calyx. Cleared in a single sitting via scarless Holmium laser micro-dusting.
+          </p>
+        </div>
+
+        <div class="scroll-hint-bar">
+          <span>Scroll down to trace the stone &amp; 3D laser</span>
+          <span>↓ 01 / 04</span>
+        </div>
+      </article>
+    </section>
+
+    <!-- STAGE 1: URETERAL DESCENT & SYMPTOM TRIAGE -->
+    <section class="story-section narrative-step" id="stage-symptoms">
+      <article class="clinical-card">
+        <span class="eyebrow">Stage 02 · Ureteral Descent</span>
+        <h2>Why Early Urological Care Protects Your Kidney</h2>
+        <p class="body-copy">
+          As a calculus leaves the kidney, it enters the delicate 3–4 mm muscular ureter with three natural anatomical narrowings. Obstruction builds back-pressure (hydronephrosis) and intense renal colic—timely laser relief protects long-term nephron function.
+        </p>
+
+        <div class="triage-grid">
+          <div class="triage-box">
+            <div class="triage-title">Same-Day OPD Consultation</div>
+            <p class="triage-text">
+              Flank-to-groin waves, burning urination, urinary urgency, pink urine, or reviewing an ultrasound / CT scan.
+            </p>
+          </div>
+          <div class="triage-box urgent">
+            <div class="triage-title">Immediate Priority Warning</div>
+            <p class="triage-text">
+              High fever or chills alongside stone pain, persistent vomiting, blocked urine output, or a single kidney.
+            </p>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- STAGE 2: RIRS, URSL & MINI-PCNL INTERACTIVE 3D LASER SUITE -->
+    <section class="story-section narrative-step" id="stage-laser">
+      <article class="clinical-card">
+        <span class="eyebrow">Stage 03 · Advanced Endourology</span>
+        <h2>Interactive 3D: URSL, RIRS &amp; Mini-PCNL</h2>
+
+        <div class="modality-row" role="tablist" aria-label="Compare surgical stone procedures in 3D">
+          <button type="button" id="mod-ursl" class="modality-btn active" data-modality="ursl">
+            URSL (Ureter Laser)
+          </button>
+          <button type="button" id="mod-rirs" class="modality-btn" data-modality="rirs">
+            RIRS (Kidney Flexible)
+          </button>
+          <button type="button" id="mod-pcnl" class="modality-btn" data-modality="pcnl">
+            PCNL (Keyhole &gt;2 cm)
+          </button>
+        </div>
+
+        <p id="modality-description" class="body-copy">
+          <strong>URSL (Ureteroscopic Lithotripsy):</strong> An ultra-thin endoscope glides naturally through the urinary passage into the ureter—firing a 200-micron Holmium laser fiber that vaporizes impacted ureteric stones with zero skin incisions.
+        </p>
+
+        <div class="metrics-strip">
+          <div>
+            <span id="metric-1-val" class="metric-val">0 Cuts</span>
+            <span id="metric-1-lbl" class="metric-lbl">Natural Orifice</span>
+          </div>
+          <div>
+            <span id="metric-2-val" class="metric-val">98%+</span>
+            <span id="metric-2-lbl" class="metric-lbl">Stone-Free Clearance</span>
+          </div>
+          <div>
+            <span id="metric-3-val" class="metric-val">Day-Care</span>
+            <span id="metric-3-lbl" class="metric-lbl">Rapid Return to Work</span>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- STAGE 3: BLADDER WASHOUT & PROSTATE (HoLEP / TURP) -->
+    <section class="story-section narrative-step final-step" id="stage-clearance">
+      <article class="clinical-card">
+        <span class="eyebrow">Stage 04 · Bladder &amp; Prostate Zone</span>
+        <h2>Complete Stone Washout &amp; HoLEP / TURP Relief</h2>
+        <p class="body-copy">
+          Sub-millimeter laser dust washes harmlessly out through the bladder. Surrounding the bladder outlet (highlighted in 3D below the bladder neck) sits the prostate—where Dr. Sammohit performs bloodless <strong>HoLEP</strong> (Holmium Laser Enucleation) and <strong>Bipolar TURP</strong> for enlarged prostate (BPH).
+        </p>
+        <div class="cta-row" style="margin-bottom: 0;">
+          <a href="#book-visit" id="clearance-cta" class="btn btn-primary">
+            Schedule Consultation
+          </a>
+          <a href="#surgical-expertise" id="view-surgeries-cta" class="btn btn-ghost">
+            All 5 Surgeries ↓
+          </a>
+        </div>
+      </article>
+    </section>
+
+    <div id="journey-end-anchor" aria-hidden="true"></div>
+  </main>
+
+  <!-- Executive Surgeon Credentials, 5 Core Surgeries, Men's Sexual Health & Booking -->
+  <section class="closing-section" id="surgical-expertise">
+    <div class="closing-container">
+      <!-- 1. Executive Surgeon Credentials (Strictly Typographic Monogram — No Portrait Photo) -->
+      <div class="surgeon-profile-card">
+        <div class="surgeon-header">
+          <div class="surgeon-crest" aria-hidden="true">GS</div>
+          <div>
+            <span class="doctor-kicker" style="margin-bottom: 2px;">Chief Consultant Urologist &amp; Andrologist</span>
+            <h2 style="margin-bottom: 2px;">Dr. G SVS Sammohit</h2>
+            <p class="body-copy" style="margin-bottom: 0;">Sammohit’s Urology and Andrology Center</p>
+          </div>
+        </div>
+        <p class="body-copy" style="margin-bottom: 0;">
+          Trained at the super-specialty <strong>M.Ch Urology</strong> level following an <strong>M.S in General Surgery</strong>, Dr. G SVS Sammohit has personally performed <strong>over 1,000+ advanced endourological, laser prostate, and micro-andrological procedures</strong>. Known for clear anatomical explanations, ethical surgical judgment, and rapid, painless patient recovery.
+        </p>
+        <div class="degree-pills">
+          <span class="degree-pill">M.S General Surgery</span>
+          <span class="degree-pill">M.Ch Urology</span>
+          <span class="degree-pill">Consultant Urologist &amp; Andrologist</span>
+          <span class="degree-pill">1,000+ Procedures Performed</span>
+        </div>
+      </div>
+
+      <!-- 2. Core Surgical Mastery: RIRS, PCNL, URSL, HoLEP, TURP -->
+      <div>
+        <span class="eyebrow">Super-Specialty Endourology</span>
+        <h2>Advanced Laser Kidney Stone &amp; Prostate Surgeries</h2>
+        <div class="capabilities-grid">
+          <div class="capability-card">
+            <span class="proc-code">RIRS · Zero-Incision Kidney Laser</span>
+            <h3>Retrograde Intrarenal Surgery</h3>
+            <p>Ultra-thin flexible digital ureteroscope navigates naturally up into kidney calyces to dust complex stones into fine sand without any skin cut or stitches.</p>
+          </div>
+          <div class="capability-card">
+            <span class="proc-code">PCNL / Mini-PCNL · Large Stones</span>
+            <h3>Percutaneous Nephrolithotomy</h3>
+            <p>Pinpoint keyhole tract access clears large (&gt;2 cm) or staghorn renal calculi completely in a single sitting with minimal blood loss and fast recovery.</p>
+          </div>
+          <div class="capability-card">
+            <span class="proc-code">URSL · Ureteric Stone Relief</span>
+            <h3>Ureteroscopic Laser Lithotripsy</h3>
+            <p>Rapid, scarless endoscopic Holmium laser fragmentation for painful stones impacted in the upper, mid, or lower ureter—restoring kidney drainage immediately.</p>
+          </div>
+          <div class="capability-card">
+            <span class="proc-code">HoLEP · Gold-Standard Laser BPH</span>
+            <h3>Holmium Laser Enucleation of Prostate</h3>
+            <p>Complete, virtually bloodless laser removal of obstructing prostate tissue for enlarged prostates of any size—safe even for patients on blood thinners.</p>
+          </div>
+          <div class="capability-card">
+            <span class="proc-code">TURP · Proven Flow Restoration</span>
+            <h3>Transurethral Resection of Prostate</h3>
+            <p>Precision endoscopic bipolar resection that relieves weak urinary stream, straining, and frequent night-time urination with lasting comfort.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Dedicated, Dignified & Confidential Men's Sexual Health & Andrology Clinic -->
+      <div class="andrology-suite" id="andrology-clinic">
+        <span class="privacy-note">100% Confidential · Private One-on-One Consultation</span>
+        <span class="doctor-kicker">Men’s Sexual Health &amp; Andrology Specialist</span>
+        <h2>Scientific, Judgment-Free Care for Male Sexual Wellness</h2>
+        <p class="body-copy">
+          Sexual health concerns are medical conditions with clear vascular, hormonal, or neurogenic causes—never something to endure in silence. As a qualified <strong>M.Ch Urologist &amp; Andrologist</strong>, Dr. G SVS Sammohit provides discreet, evidence-based diagnostics and lasting restoration in a strictly private clinical setting.
+        </p>
+
+        <div class="andrology-grid">
+          <div class="andrology-item">
+            <h3>Erectile Dysfunction (ED)</h3>
+            <p>Root-cause vascular, metabolic, and hormonal evaluation paired with modern medical therapies, shockwave/restorative protocols, and refractory ED solutions.</p>
+          </div>
+          <div class="andrology-item">
+            <h3>Premature Ejaculation (PE)</h3>
+            <p>Structured, personalized neuro-pharmacological and behavioral regimens engineered for reliable long-term control and renewed confidence.</p>
+          </div>
+          <div class="andrology-item">
+            <h3>Male Infertility &amp; Varicocele</h3>
+            <p>Comprehensive fertility profiling, hormonal optimization, azoospermia workup, and microscopic varicocele repair to maximize natural conception potential.</p>
+          </div>
+          <div class="andrology-item">
+            <h3>All Male Sexual Disorders</h3>
+            <p>Expert management of low testosterone / reduced libido, penile curvature (Peyronie’s), anejaculation, painful intercourse, and pre-marital men’s health checkups.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Clinic Location & Appointment Request -->
+      <div class="booking-panel" id="book-visit">
+        <div class="location-banner">
+          <div>
+            <span class="doctor-kicker" style="margin-bottom: 2px;">Verified Clinic Location</span>
+            <h3 style="margin-bottom: 2px;">Sammohit’s Urology and Andrology Center</h3>
+            <p class="body-copy" style="margin-bottom: 0; font-size: 0.82rem;">Open Google Maps for turn-by-turn navigation to the clinic.</p>
+          </div>
+          <a href="https://maps.app.goo.gl/YMChaGH4DkSuD63o9?g_st=ic" target="_blank" rel="noopener noreferrer" id="clinic-directions-btn" class="btn btn-gold">
+            Open Clinic on Google Maps ↗
+          </a>
+        </div>
+
+        <span class="eyebrow">Direct Appointment Desk</span>
+        <h2>Schedule a Consultation with Dr. G SVS Sammohit</h2>
+        <p class="body-copy">
+          Reserve a priority slot for acute kidney stone pain, laser surgery second opinions, prostate symptoms, or a strictly confidential Men’s Sexual Health visit.
+        </p>
+
+        <form id="consultation-form" class="booking-form">
+          <div class="form-field">
+            <label for="patient-name">Patient Name (Initials Accepted for Privacy)</label>
+            <input type="text" id="patient-name" name="patientName" placeholder="Your Name or Initials" required />
+          </div>
+          <div class="form-field">
+            <label for="patient-phone">Mobile / WhatsApp Number</label>
+            <input type="tel" id="patient-phone" name="patientPhone" placeholder="+91 98XXX XXXXX" required />
+          </div>
+          <div class="form-field">
+            <label for="visit-urgency">Consultation Specialty</label>
+            <select id="visit-urgency" name="visitUrgency">
+              <option value="stone">Kidney / Ureter Stone Laser (RIRS · PCNL · URSL)</option>
+              <option value="prostate">Prostate Enlargement Care (HoLEP · TURP)</option>
+              <option value="andrology">Confidential Men’s Sexual Health (ED · PE · Andrology)</option>
+              <option value="general">General Urology Consultation / Scan Review</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="stone-known-size">Clinical Note (Optional)</label>
+            <input type="text" id="stone-known-size" name="stoneSize" placeholder="e.g., 8 mm stone on USG, or private callback" />
+          </div>
+          <div class="form-field span-2">
+            <button type="submit" id="submit-booking-btn" class="btn btn-primary">
+              Confirm Private Appointment Request
+            </button>
+          </div>
+        </form>
+
+        <div id="booking-success-msg" class="booking-success" role="status"></div>
+      </div>
+
+      <footer class="site-footer">
+        <span><strong>Sammohit’s Urology and Andrology Center</strong> · Dr. G SVS Sammohit (M.S, M.Ch Urology)</span>
+        <a href="https://maps.app.goo.gl/YMChaGH4DkSuD63o9?g_st=ic" target="_blank" rel="noopener noreferrer" style="color: var(--gold-executive); text-decoration: none;">View Clinic on Google Maps ↗</a>
+      </footer>
+    </div>
+  </section>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

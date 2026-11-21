@@ -1,0 +1,870 @@
+:root {
+  /* Executive Surgical Dark 3D Studio Palette (Zero purple; deep obsidian-slate, surgical teal-cyan, warm champagne gold & coral) */
+  --bg-canvas: hsl(207, 56%, 6%);
+  --surface-glass: hsla(208, 46%, 10%, 0.78);
+  --surface-glass-strong: hsla(208, 48%, 12%, 0.94);
+  --surface-subtle: hsla(206, 38%, 16%, 0.62);
+
+  --border-hairline: hsla(200, 38%, 85%, 0.12);
+  --border-strong: hsla(200, 38%, 85%, 0.22);
+
+  --ink-primary: hsl(200, 32%, 96%);
+  --ink-secondary: hsl(204, 19%, 75%);
+  --ink-muted: hsl(206, 15%, 56%);
+
+  --accent-primary: hsl(190, 78%, 47%);
+  --accent-primary-hover: hsl(190, 82%, 54%);
+  --accent-ink: hsl(208, 60%, 7%);
+
+  --gold-executive: hsl(39, 76%, 57%);
+  --gold-soft: hsla(39, 76%, 57%, 0.13);
+  --gold-border: hsla(39, 76%, 57%, 0.34);
+
+  --urgent-tone: hsl(11, 82%, 62%);
+  --urgent-soft: hsla(11, 82%, 56%, 0.13);
+  --amber-stone: hsl(36, 92%, 56%);
+
+  --shadow-card:
+    0 2px 6px hsla(212, 65%, 4%, 0.35),
+    0 22px 48px -12px hsla(212, 70%, 3%, 0.58);
+
+  --font-serif: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --radius-lg: 20px;
+  --radius-md: 12px;
+  --radius-pill: 999px;
+}
+
+html[data-theme="light"] {
+  --bg-canvas: hsl(204, 32%, 95%);
+  --surface-glass: hsla(200, 33%, 99%, 0.84);
+  --surface-glass-strong: hsla(200, 35%, 99%, 0.95);
+  --surface-subtle: hsla(204, 25%, 92%, 0.76);
+
+  --border-hairline: hsla(210, 32%, 18%, 0.10);
+  --border-strong: hsla(210, 32%, 18%, 0.19);
+
+  --ink-primary: hsl(212, 44%, 13%);
+  --ink-secondary: hsl(211, 22%, 31%);
+  --ink-muted: hsl(210, 15%, 46%);
+
+  --accent-primary: hsl(193, 82%, 30%);
+  --accent-primary-hover: hsl(193, 86%, 24%);
+  --accent-ink: #ffffff;
+
+  --gold-executive: hsl(37, 79%, 34%);
+  --gold-soft: hsla(37, 79%, 34%, 0.10);
+  --gold-border: hsla(37, 79%, 34%, 0.28);
+
+  --urgent-tone: hsl(8, 70%, 45%);
+  --urgent-soft: hsla(8, 70%, 45%, 0.09);
+
+  --shadow-card:
+    0 1px 3px hsla(212, 40%, 12%, 0.05),
+    0 16px 36px -10px hsla(212, 38%, 15%, 0.11);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--ink-primary);
+  background-color: var(--bg-canvas);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  touch-action: pan-y;
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+/* Fixed Full-Viewport Three.js WebGL Stage */
+#webgl-container {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  touch-action: pan-y;
+  cursor: grab;
+}
+
+#webgl-container:active {
+  cursor: grabbing;
+}
+
+#webgl-container canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Sticky Executive Header */
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(12px, 4vw, 40px);
+  background: var(--surface-glass);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--ink-primary);
+}
+
+.brand-monogram {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-serif);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--gold-executive);
+  flex-shrink: 0;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-name {
+  font-family: var(--font-serif);
+  font-size: clamp(0.95rem, 2.5vw, 1.08rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.brand-sub {
+  font-size: 0.64rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.nav-links {
+  display: none;
+  align-items: center;
+  gap: 20px;
+  margin-right: 10px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  font-size: 0.83rem;
+  font-weight: 500;
+  color: var(--ink-secondary);
+  transition: color 0.2s ease;
+}
+
+.nav-links a:hover {
+  color: var(--accent-primary);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: var(--font-sans);
+  font-size: 0.84rem;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 9px 16px;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.16s ease, background-color 0.2s ease, border-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: var(--accent-primary);
+  color: var(--accent-ink);
+}
+
+.btn-primary:hover {
+  background: var(--accent-primary-hover);
+}
+
+.btn-ghost {
+  background: var(--surface-subtle);
+  color: var(--ink-primary);
+  border-color: var(--border-hairline);
+}
+
+.btn-ghost:hover {
+  border-color: var(--border-strong);
+}
+
+.btn-gold {
+  background: var(--gold-soft);
+  color: var(--gold-executive);
+  border-color: var(--gold-border);
+}
+
+.btn-gold:hover {
+  border-color: var(--gold-executive);
+}
+
+.btn-sm {
+  font-size: 0.74rem;
+  padding: 6px 11px;
+}
+
+/* Live 3D Anatomical HUD Bar */
+.anatomy-hud {
+  position: fixed;
+  top: 72px;
+  left: clamp(12px, 3vw, 40px);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--border-hairline);
+  font-size: 0.73rem;
+  color: var(--ink-secondary);
+  pointer-events: none;
+}
+
+.hud-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--amber-stone);
+  transition: background-color 0.3s ease;
+}
+
+.hud-stage {
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.hud-metric {
+  font-family: var(--font-mono);
+  font-size: 0.69rem;
+  color: var(--ink-muted);
+  padding-left: 8px;
+  border-left: 1px solid var(--border-hairline);
+}
+
+.orbit-hint {
+  position: fixed;
+  top: 72px;
+  right: clamp(12px, 3vw, 40px);
+  z-index: 30;
+  padding: 6px 11px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--border-hairline);
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+  pointer-events: none;
+}
+
+/* Slim Scroll Progress Rail */
+.tract-rail {
+  position: fixed;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 30;
+  pointer-events: none;
+}
+
+.tract-rail-track {
+  width: 3px;
+  height: 150px;
+  background: var(--border-hairline);
+  border-radius: 99px;
+  overflow: hidden;
+  position: relative;
+}
+
+.tract-rail-fill {
+  width: 100%;
+  height: 0%;
+  background: var(--accent-primary);
+  border-radius: 99px;
+}
+
+/* Foreground Story Layout */
+.story-main {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 clamp(14px, 4vw, 48px);
+  pointer-events: none;
+}
+
+.story-section {
+  pointer-events: auto;
+  max-width: 495px;
+}
+
+.hero-section {
+  padding-top: 48vh;
+  margin-bottom: 58vh;
+}
+
+.narrative-step {
+  margin-bottom: 62vh;
+}
+
+.narrative-step.final-step {
+  margin-bottom: 22vh;
+}
+
+.clinical-card {
+  background: var(--surface-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  padding: clamp(20px, 5vw, 30px);
+  box-shadow: var(--shadow-card);
+}
+
+.doctor-kicker {
+  display: block;
+  font-size: 0.71rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--gold-executive);
+  margin-bottom: 6px;
+}
+
+.eyebrow {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--accent-primary);
+  margin-bottom: 9px;
+}
+
+h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(1.85rem, 5.6vw, 2.85rem);
+  font-weight: 500;
+  line-height: 1.09;
+  letter-spacing: -0.025em;
+  color: var(--ink-primary);
+  margin-bottom: 12px;
+}
+
+h2 {
+  font-family: var(--font-serif);
+  font-size: clamp(1.42rem, 4.4vw, 2.05rem);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--ink-primary);
+  margin-bottom: 11px;
+}
+
+h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink-primary);
+  margin-bottom: 6px;
+}
+
+.lead-copy {
+  font-size: clamp(0.91rem, 2.4vw, 1.01rem);
+  color: var(--ink-secondary);
+  margin-bottom: 16px;
+}
+
+.body-copy {
+  font-size: 0.9rem;
+  color: var(--ink-secondary);
+  margin-bottom: 14px;
+}
+
+.credential-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 12px 0;
+  margin-bottom: 16px;
+  border-top: 1px solid var(--border-hairline);
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.cred-val {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.cred-lbl {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--ink-muted);
+  line-height: 1.25;
+}
+
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-bottom: 16px;
+}
+
+.scroll-hint-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+  padding-top: 13px;
+  border-top: 1px solid var(--border-hairline);
+}
+
+/* Interactive 3D Stone Size Selector */
+.control-panel {
+  background: var(--surface-subtle);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  margin-top: 12px;
+}
+
+.control-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.77rem;
+  color: var(--ink-secondary);
+  margin-bottom: 9px;
+}
+
+.size-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.size-btn {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 8px 4px;
+  border-radius: 8px;
+  border: 1px solid var(--border-hairline);
+  background: var(--surface-glass-strong);
+  color: var(--ink-secondary);
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.size-btn.active {
+  background: var(--accent-primary);
+  color: var(--accent-ink);
+  border-color: var(--accent-primary);
+}
+
+.size-readout {
+  font-size: 0.79rem;
+  color: var(--ink-secondary);
+  line-height: 1.45;
+}
+
+.size-readout strong {
+  color: var(--ink-primary);
+}
+
+/* Triage Cards */
+.triage-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 9px;
+  margin-top: 12px;
+}
+
+.triage-box {
+  padding: 11px 13px;
+  border-radius: var(--radius-md);
+  background: var(--surface-subtle);
+  border: 1px solid var(--border-hairline);
+}
+
+.triage-box.urgent {
+  background: var(--urgent-soft);
+  border-color: hsla(11, 82%, 58%, 0.25);
+}
+
+.triage-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 3px;
+  color: var(--ink-primary);
+}
+
+.triage-box.urgent .triage-title {
+  color: var(--urgent-tone);
+}
+
+.triage-text {
+  font-size: 0.78rem;
+  color: var(--ink-secondary);
+}
+
+/* Modality Switcher in Stage 3 */
+.modality-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  margin-bottom: 12px;
+  padding-bottom: 2px;
+}
+
+.modality-btn {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 7px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-hairline);
+  background: var(--surface-subtle);
+  color: var(--ink-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.16s ease;
+}
+
+.modality-btn.active {
+  background: var(--accent-primary);
+  color: var(--accent-ink);
+  border-color: var(--accent-primary);
+}
+
+.metrics-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-hairline);
+}
+
+.metric-val {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.metric-lbl {
+  font-size: 0.69rem;
+  color: var(--ink-muted);
+}
+
+/* Closing Clinical Portfolio, Doctor Profile, Andrology Suite & Booking */
+.closing-section {
+  pointer-events: auto;
+  position: relative;
+  z-index: 20;
+  background: var(--surface-glass-strong);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid var(--border-hairline);
+  padding: clamp(48px, 8vw, 88px) clamp(16px, 4vw, 48px);
+}
+
+.closing-container {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 44px;
+}
+
+/* Executive Surgeon Profile Card (Zero Portrait Photo — Pure Typographic Monogram & Credentials) */
+.surgeon-profile-card {
+  background: var(--surface-subtle);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-lg);
+  padding: clamp(22px, 5vw, 34px);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.surgeon-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.surgeon-crest {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--gold-executive);
+  flex-shrink: 0;
+}
+
+.degree-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.degree-pill {
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-glass-strong);
+  border: 1px solid var(--border-hairline);
+  color: var(--ink-primary);
+}
+
+/* 5 Surgical Procedures Grid */
+.capabilities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.capability-card {
+  background: var(--surface-subtle);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.proc-code {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent-primary);
+  text-transform: uppercase;
+}
+
+.capability-card p {
+  font-size: 0.84rem;
+  color: var(--ink-secondary);
+}
+
+/* Dignified Men's Sexual Health & Andrology Suite */
+.andrology-suite {
+  background: var(--surface-subtle);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-lg);
+  padding: clamp(24px, 5vw, 38px);
+}
+
+.privacy-note {
+  display: inline-block;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--gold-executive);
+  background: var(--gold-soft);
+  border: 1px solid var(--gold-border);
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 14px;
+}
+
+.andrology-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.andrology-item {
+  background: var(--surface-glass-strong);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  padding: 18px;
+}
+
+.andrology-item p {
+  font-size: 0.83rem;
+  color: var(--ink-secondary);
+}
+
+/* Location & Booking Grid */
+.booking-panel {
+  background: var(--surface-subtle);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: clamp(22px, 5vw, 36px);
+}
+
+.location-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+  border-radius: var(--radius-md);
+  background: var(--surface-glass-strong);
+  border: 1px solid var(--border-hairline);
+}
+
+.booking-form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 13px;
+  margin-top: 16px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-field label {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--ink-secondary);
+}
+
+.form-field input,
+.form-field select {
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  padding: 11px 13px;
+  border-radius: 10px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-glass-strong);
+  color: var(--ink-primary);
+  width: 100%;
+}
+
+.form-field input:focus,
+.form-field select:focus {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 1px;
+}
+
+.booking-success {
+  display: none;
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: hsla(174, 72%, 38%, 0.16);
+  border: 1px solid hsla(174, 72%, 45%, 0.35);
+  color: var(--ink-primary);
+  font-size: 0.86rem;
+}
+
+.site-footer {
+  padding-top: 22px;
+  border-top: 1px solid var(--border-hairline);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+
+@media (min-width: 900px) {
+  .nav-links {
+    display: flex;
+  }
+
+  .hero-section {
+    padding-top: 16vh;
+    margin-bottom: 36vh;
+  }
+
+  .narrative-step {
+    margin-bottom: 42vh;
+  }
+
+  .story-section {
+    max-width: 470px;
+  }
+
+  .triage-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .booking-form {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .booking-form .span-2 {
+    grid-column: 1 / -1;
+  }
+}
