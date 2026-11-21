@@ -972,6 +972,15 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   let rafId = 0;
   let firstFrameSent = false;
 
+  // Procedure switches blend instead of cutting: the stone, instruments and
+  // camera all ease towards the new target so the anatomy stays continuous.
+  const mix = { renal: 0, scope: 1, pcnl: 0, mm: appState.stoneSizeMm };
+  const camPosSmooth = new THREE.Vector3();
+  const camLookSmooth = new THREE.Vector3();
+  const camPosGoal = new THREE.Vector3();
+  let camPrimed = false;
+  let lastElapsed = 0;
+
   function animate() {
     if (!running) return;
     rafId = requestAnimationFrame(animate);
@@ -981,6 +990,15 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     filmPass.uniforms.uTime.value = elapsed;
     appState.scrollCurrent += (appState.scrollTarget - appState.scrollCurrent) * 0.09;
     const p = appState.scrollCurrent;
+    const dt = Math.min(0.1, Math.max(0, elapsed - lastElapsed));
+    lastElapsed = elapsed;
+    const ease = 1 - Math.exp(-dt * 3.2);
+    const renalGoal = appState.modality === 'ursl' ? 0 : 1;
+    mix.renal += (renalGoal - mix.renal) * (1 - Math.exp(-dt * 2.2));
+    mix.scope += ((appState.modality === 'pcnl' ? 0 : 1) - mix.scope) * ease;
+    mix.pcnl += ((appState.modality === 'pcnl' ? 1 : 0) - mix.pcnl) * ease;
+    mix.mm += (Math.min(16, appState.stoneSizeMm) - mix.mm) * ease;
+    const renalMix = mix.renal * mix.renal * (3 - 2 * mix.renal);
 
     const heartWave = Math.pow(Math.max(0, Math.sin(elapsed * 3.55)), 4);
     arteryGroup.scale.setScalar(1 + heartWave * 0.025);
@@ -993,40 +1011,53 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     organRoot.rotation.y = autoScrollYaw + appState.userYawCurrent;
     organRoot.rotation.x = appState.userPitchCurrent;
 
-    const isRenalTarget = appState.modality === 'rirs' || appState.modality === 'pcnl';
-    let stoneU = 0.015;
     let erosion = 0;
     let laserIntensity = 0;
     let dustProgress = 0;
     let flushProgress = 0;
     let symptomPulse = 0;
 
-    if (p <= 0.14) {
-      stoneU = 0.015 + (p / 0.14) * 0.055;
-    } else if (p <= 0.50) {
-      const t = (p - 0.14) / 0.36;
-      const eased = t + 0.032 * Math.sin(t * Math.PI * 3);
-      stoneU = 0.07 + Math.max(0, Math.min(1, eased)) * (isRenalTarget ? 0.04 : 0.67);
-      symptomPulse = Math.sin(t * Math.PI);
-    } else if (p <= 0.75) {
+    // Where the stone sits for a given mix of ureter (0) and kidney (1) target.
+    const stoneUFor = r => {
+      if (p <= 0.14) return 0.015 + (p / 0.14) * 0.055;
+      if (p <= 0.50) {
+        const t = (p - 0.14) / 0.36;
+        const eased = Math.max(0, Math.min(1, t + 0.032 * Math.sin(t * Math.PI * 3)));
+        return 0.07 + eased * (0.67 + (0.04 - 0.67) * r);
+      }
+      if (p <= 0.75) {
+        const u = 0.74 + ((p - 0.50) / 0.25) * 0.025;
+        return u + (0.065 - u) * r;
+      }
+      return 0.765 + (0.065 - 0.765) * r;
+    };
+
+    if (p > 0.14 && p <= 0.50) {
+      symptomPulse = Math.sin(((p - 0.14) / 0.36) * Math.PI);
+    } else if (p > 0.50 && p <= 0.75) {
       const t = (p - 0.50) / 0.25;
-      stoneU = isRenalTarget ? 0.065 : 0.74 + t * 0.025;
       laserIntensity = Math.sin(Math.min(1, t * 1.15) * Math.PI);
       erosion = smoothstep(0.10, 0.90, t);
       dustProgress = smoothstep(0.08, 0.96, t);
       symptomPulse = Math.max(0, (1 - t * 2.5) * 0.45);
-    } else {
-      const t = (p - 0.75) / 0.25;
-      stoneU = isRenalTarget ? 0.065 : 0.765;
+    } else if (p > 0.75) {
       erosion = 1.0;
       dustProgress = 1.0;
-      flushProgress = t;
+      flushProgress = (p - 0.75) / 0.25;
     }
 
+    // On a procedure switch the camera and scope glide along the urinary tract
+    // (pathU), while the stone shrinks away at its old site and grows back at
+    // the new one, so nothing ever teleports.
+    const pathU = stoneUFor(renalMix);
+    const stoneU = stoneUFor(renalMix < 0.5 ? 0 : 1);
+    const swapScale = Math.min(1, Math.abs(renalMix * 2 - 1) * 1.6);
+    const focusPoint = ureterCurve.getPointAt(Math.min(1, pathU));
+
     const stoneCenter = ureterCurve.getPointAt(Math.min(1, stoneU));
-    const clampedMm = Math.min(16, appState.stoneSizeMm);
+    const clampedMm = Math.min(16, mix.mm);
     const baseStoneRadius = 0.108 + (clampedMm - 4) * 0.0095;
-    const intactScale = Math.max(0, 1 - erosion * 0.95);
+    const intactScale = Math.max(0, 1 - erosion * 0.95) * swapScale;
     const activeStoneRadius = baseStoneRadius * intactScale;
 
     if (intactScale > 0.03) {
@@ -1062,7 +1093,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
         ring.position.copy(stoneCenter);
         ring.scale.setScalar(scale);
         ring.rotation.x = Math.PI * 0.42;
-        ring.material.opacity = (1 - phase) * 0.52 * symptomPulse;
+        ring.material.opacity = (1 - phase) * 0.52 * symptomPulse * swapScale;
       } else {
         ring.visible = false;
       }
@@ -1076,15 +1107,17 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     scopeHeadlamp.intensity = 0;
     pcnlSheathMesh.visible = false;
 
-    if ((appState.modality === 'ursl' || appState.modality === 'rirs') && p > 0.41 && p < 0.83) {
+    let scopeShown = false;
+    if (mix.scope > 0.02 && p > 0.41 && p < 0.83) {
+      scopeShown = true;
       const enter = smoothstep(0.41, 0.51, p);
       const retract = p > 0.73 ? 1 - smoothstep(0.73, 0.82, p) : 1;
-      const reach = enter * retract;
-      const desiredTipU = Math.min(0.99, stoneU + 0.055);
+      const reach = enter * retract * mix.scope;
+      const desiredTipU = Math.min(0.99, pathU + 0.055);
       const currentTipU = 1.07 - (1.07 - desiredTipU) * reach;
 
       const scopeInfo = rebuildScopeTube(currentTipU);
-      if (scopeInfo && reach > 0.78) {
+      if (scopeInfo && reach > 0.78 && appState.modality !== 'pcnl') {
         scopeHeadlamp.intensity = 2.2 * reach;
 
         if (laserIntensity > 0.05 && intactScale > 0.04) {
@@ -1112,11 +1145,12 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
           laserFlashLight.intensity = 4.2 * laserIntensity * pulse;
         }
       }
-    } else if (appState.modality === 'pcnl' && p > 0.42 && p < 0.82) {
-      rebuildScopeTube(1.1);
+    }
+    if (!scopeShown) rebuildScopeTube(1.1);
+    if (mix.pcnl > 0.02 && p > 0.42 && p < 0.82) {
       const enter = smoothstep(0.42, 0.50, p);
       const retract = p > 0.73 ? 1 - smoothstep(0.73, 0.81, p) : 1;
-      const reach = enter * retract;
+      const reach = enter * retract * mix.pcnl;
       pcnlSheathMesh.visible = reach > 0.05;
       pcnlSheathMesh.position.x = (1 - reach) * 1.6;
 
@@ -1143,11 +1177,9 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
         laserFlashLight.position.copy(stoneCenter);
         laserFlashLight.intensity = 4.4 * laserIntensity * pulse;
       }
-    } else {
-      rebuildScopeTube(1.1);
     }
 
-    const burstOriginU = isRenalTarget ? 0.07 : 0.75;
+    const burstOriginU = 0.75 + (0.07 - 0.75) * renalMix;
     const showBurst = dustProgress > 0.01;
     shardInstanced.visible = showBurst && flushProgress < 0.55;
     if (shardInstanced.visible) {
@@ -1192,7 +1224,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
           continue;
         }
 
-        const spanScale = isRenalTarget ? 0.85 : 0.36;
+        const spanScale = 0.36 + (0.85 - 0.36) * renalMix;
         const uTrack = burstOriginU + travel * spanScale;
         if (uTrack <= 1.0) {
           const idxRing = Math.min(U_RINGS, Math.floor(uTrack * U_RINGS));
@@ -1249,16 +1281,18 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
       camDist = 6.2 - k * 0.5;
       camElevOffset = 0.35;
     } else if (p < 0.50) {
-      focusX = stoneCenter.x;
-      focusY = stoneCenter.y;
+      focusX = focusPoint.x;
+      focusY = focusPoint.y;
       camDist = 5.4;
       camElevOffset = 0.25;
     } else if (p < 0.75) {
       const mZoom = Math.sin(((p - 0.50) / 0.25) * Math.PI);
-      focusX = stoneCenter.x + (isRenalTarget ? 0.25 : 0);
-      focusY = stoneCenter.y - (isRenalTarget ? -0.10 : 0.15);
-      camDist = 5.3 - mZoom * 1.35;
-      camElevOffset = isRenalTarget ? 0.22 : -0.25 * mZoom;
+      // Inside the kidney (RIRS, PCNL) stay further back so the whole organ
+      // stays in frame; in the ureter (URSL) move in close to the stone.
+      focusX = focusPoint.x + 0.25 * renalMix;
+      focusY = focusPoint.y - 0.15 + 0.55 * renalMix;
+      camDist = 5.3 - mZoom * (1.35 - 0.9 * renalMix) + 1.35 * renalMix;
+      camElevOffset = -0.25 * mZoom + (0.22 + 0.25 * mZoom) * renalMix;
     } else {
       const b = (p - 0.75) / 0.25;
       focusX = 0.15;
@@ -1269,7 +1303,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
 
     if (isDesktop) {
       const desktopShiftX = -1.65 * (camDist / 5.8);
-      camera.position.set(
+      camPosGoal.set(
         focusX + desktopShiftX + Math.sin(p * 3.2) * 0.45,
         focusY + camElevOffset,
         camDist
@@ -1280,14 +1314,25 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
       // the screen so the text cards below never cover it.
       const portrait = Math.min(1, Math.max(0, (0.9 - camera.aspect) / 0.45));
       const mobileShiftY = -(0.58 + 1.0 * portrait) * (camDist / 5.6);
-      camera.position.set(
+      camPosGoal.set(
         focusX + Math.sin(p * 3.0) * 0.38,
         focusY + mobileShiftY + camElevOffset,
         camDist * (1.06 + 0.75 * portrait)
       );
       camTargetLook.set(focusX, focusY + mobileShiftY, 0);
     }
-    camera.lookAt(camTargetLook);
+    // Light damping so any remaining change of target glides rather than cuts.
+    if (!camPrimed) {
+      camPosSmooth.copy(camPosGoal);
+      camLookSmooth.copy(camTargetLook);
+      camPrimed = true;
+    } else {
+      const k = 1 - Math.exp(-dt * 6);
+      camPosSmooth.lerp(camPosGoal, k);
+      camLookSmooth.lerp(camTargetLook, k);
+    }
+    camera.position.copy(camPosSmooth);
+    camera.lookAt(camLookSmooth);
 
     composer.render();
     if (!firstFrameSent) {
