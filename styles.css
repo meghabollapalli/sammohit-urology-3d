@@ -557,6 +557,13 @@ main:focus {
 main {
   position: relative;
   z-index: 1;
+  /* Let drags on empty journey space reach the 3D canvas underneath. */
+  pointer-events: none;
+}
+
+.journey-card,
+.content {
+  pointer-events: auto;
 }
 
 .journey {

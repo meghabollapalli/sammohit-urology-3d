@@ -155,3 +155,14 @@ test('has no serious accessibility violations', async ({ page }) => {
     .map(v => `${v.id}: ${v.nodes.map(n => n.target.join(' ')).join(', ')}`);
   expect(serious).toEqual([]);
 });
+
+test('drags on empty space reach the 3D canvas', async ({ page }, testInfo) => {
+  test.skip(isPhone(testInfo), 'desktop layout leaves empty space beside the cards');
+  await page.goto('./');
+  await expect(page.locator('html')).toHaveAttribute('data-scene', 'live', { timeout: 45_000 });
+  const target = await page.evaluate(() => {
+    const el = document.elementFromPoint(window.innerWidth - 200, window.innerHeight / 2);
+    return el && el.tagName;
+  });
+  expect(target).toBe('CANVAS');
+});
