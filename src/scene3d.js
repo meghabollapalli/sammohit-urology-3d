@@ -54,8 +54,12 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   });
   const MAX_DPR = lowPower ? 1.5 : 2;
   const initialDpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+  // The canvas fills its container (the whole screen on wide layouts, the pinned
+  // top panel on phones), not the window.
+  const viewSize = () => ({ w: container.clientWidth || window.innerWidth, h: container.clientHeight || window.innerHeight });
+  let { w: viewW, h: viewH } = viewSize();
   renderer.setPixelRatio(initialDpr);
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(viewW, viewH);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.0;
   renderer.domElement.setAttribute('aria-hidden', 'true');
@@ -84,7 +88,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
 
   const camera = new THREE.PerspectiveCamera(
     38,
-    window.innerWidth / window.innerHeight,
+    viewW / viewH,
     0.1,
     80
   );
@@ -96,8 +100,8 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   scene.environmentIntensity = 0.6;
 
   const renderTarget = new THREE.WebGLRenderTarget(
-    window.innerWidth * initialDpr,
-    window.innerHeight * initialDpr,
+    viewW * initialDpr,
+    viewH * initialDpr,
     { type: THREE.HalfFloatType, samples: lowPower ? 2 : 4 }
   );
   const composer = new EffectComposer(renderer, renderTarget);
@@ -105,7 +109,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   composer.addPass(renderPass);
 
   const bloomPass = new UnrealBloomPass(
-    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    new THREE.Vector2(viewW, viewH),
     0.24,
     0.5,
     0.92
@@ -1078,16 +1082,19 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   onScroll();
 
   function onResize() {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
+    const { w, h } = viewSize();
+    onScroll();
+    if (w === viewW && h === viewH) return;
+    viewW = w;
+    viewH = h;
     const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     renderer.setPixelRatio(dpr);
     renderer.setSize(w, h);
     composer.setSize(w, h);
-    onScroll();
   }
+  if ('ResizeObserver' in window) new ResizeObserver(onResize).observe(container);
   window.addEventListener('resize', onResize, { passive: true });
 
 
@@ -1390,12 +1397,13 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
       camPosGoal.set(focus.x + desktopShiftX + sway, focus.y + camElev, camDist);
       camTargetLook.set(focus.x + desktopShiftX, focus.y, 0);
     } else {
-      // Portrait phones: pull back and lift the anatomy into the top part of
-      // the screen so the text cards below never cover it.
-      const portrait = Math.min(1, Math.max(0, (0.9 - camera.aspect) / 0.45));
-      const mobileShiftY = -(0.58 + 1.0 * portrait) * (camDist / 5.6);
-      camPosGoal.set(focus.x + sway, focus.y + mobileShiftY + camElev, camDist * (1.06 + 0.75 * portrait));
-      camTargetLook.set(focus.x, focus.y + mobileShiftY, 0);
+      // Phones and tablets: the canvas is the panel pinned above the text, so
+      // the anatomy sits in the middle of it. Narrow panels pull back a little.
+      // The look point sits a little high to keep the anatomy clear of the header.
+      const fit = Math.max(1.08, 1.2 / camera.aspect);
+      const lift = 0.3 * (camDist / 6);
+      camPosGoal.set(focus.x + sway * 0.5, focus.y + lift + camElev, camDist * fit);
+      camTargetLook.set(focus.x, focus.y + lift, 0);
     }
     if (!primed) {
       camPosSmooth.copy(camPosGoal);

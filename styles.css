@@ -2506,74 +2506,142 @@ html:not(.js) .seg[aria-pressed='true'] {
 }
 
 /* Chapter cards.
-   Wide screens: the cards of a chapter read as one column beside the 3D view.
-   Phones and tablets: the 3D view owns the top half of the screen. Each card is
-   a short sheet pinned above the action bar; scrolling swaps one sheet for the
-   next, so the anatomy is never covered. */
+   Wide screens: the cards of a chapter read as one column beside the 3D view,
+   which is fixed behind the journey.
+   Phones and tablets: plain native scrolling. The 3D view is a panel pinned to
+   the top of the screen for the length of the journey, and the text is ordinary
+   page content that scrolls up underneath it. Nothing is positioned by script,
+   nothing snaps, and sizes use lvh/px so the browser's address bar sliding in
+   and out never moves anything. */
 .panel-card,
 .panel-card > .card {
   display: contents;
 }
+.stage {
+  pointer-events: auto;
+}
 @media (max-width: 899px) {
+  :root {
+    --stage-h: 44vh;
+    --stage-h: 44lvh;
+  }
+  html {
+    scroll-padding-top: calc(var(--stage-h) + 20px);
+  }
+  .stage {
+    position: sticky;
+    inset: auto;
+    top: 0;
+    z-index: 2;
+    width: 100%;
+    height: var(--stage-h);
+    /* Text fades out as it slides under the panel. */
+    box-shadow: 0 14px 22px 4px var(--ink);
+  }
+  .stage.is-offscreen {
+    visibility: visible;
+  }
+  .stage-poster img {
+    object-position: center;
+  }
+  .stage-scrim {
+    background:
+      linear-gradient(180deg, rgba(6, 9, 13, 0.6) 0%, rgba(6, 9, 13, 0) 24%),
+      linear-gradient(180deg, rgba(6, 9, 13, 0) 78%, var(--ink) 100%);
+  }
+  .journey {
+    background: var(--ink);
+  }
+  /* The sections after the journey slide over the panel's soft lower edge. */
+  .content {
+    position: relative;
+    z-index: 3;
+  }
+  .journey .hero,
   .journey .chapter {
     display: block;
     min-height: 0;
-    padding: 0 12px;
+    padding: 28px var(--gutter) 72px;
+  }
+  .journey .chapter {
+    padding-top: 56px;
+    padding-bottom: 120px;
+    border-top: 1px solid var(--ink-line);
+  }
+  .journey .chapter:last-of-type {
+    padding-bottom: 96px;
   }
   .journey .chapter .chapter-panel {
-    max-width: none;
+    max-width: 620px;
+    width: auto;
     margin: 0;
     padding: 0;
     border: 0;
+    border-radius: 0;
     background: none;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
-  .panel-card {
-    display: flex;
-    align-items: flex-end;
-    min-height: 150svh;
-    padding-top: 50svh;
-  }
+  .panel-card,
   .panel-card > .card {
     display: block;
-    position: sticky;
-    bottom: 96px;
-    width: 100%;
-    max-width: 560px;
-    max-height: calc(50svh - 24px);
-    overflow-y: auto;
-    padding: 18px 18px 20px;
-    border: 1px solid var(--ink-line);
-    border-radius: var(--radius);
-    background: rgba(8, 12, 17, 0.9);
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
   }
-  .panel-card .display-md {
-    font-size: clamp(1.7rem, 7.4vw, 2.4rem);
-  }
-  .panel-card .chapter-label {
-    margin-bottom: 0.7rem;
-  }
-  .panel-card .chapter-body,
-  .panel-card .picker-result,
-  .panel-card .triage li {
-    font-size: 0.92rem;
-  }
-  .panel-card .picker-result {
-    min-height: 0;
+  .panel-card + .panel-card {
+    margin-top: 40px;
   }
   .panel-card .card > :first-child {
     margin-top: 0;
     padding-top: 0;
     border-top: 0;
   }
-  .panel-card .fineprint {
-    margin-top: 10px;
-    font-size: 0.74rem;
+  .panel-card .display-md {
+    font-size: clamp(1.9rem, 8vw, 2.6rem);
   }
-  .panel-card .cta-row {
-    margin-top: 1rem;
+}
+@media (max-width: 899px) and (orientation: landscape) and (max-height: 520px) {
+  :root {
+    --stage-h: 54vh;
+    --stage-h: 54lvh;
   }
+}
+
+/* Phones: calmer entrances. Content fades in where it already sits; nothing
+   slides, and headline words do not animate one by one. */
+@media (max-width: 899px) and (prefers-reduced-motion: no-preference) {
+  .js [data-reveal] {
+    transform: none;
+    transition: opacity 0.5s ease-out;
+    transition-delay: 0s;
+  }
+  .js [data-split] {
+    opacity: 0;
+    transition: opacity 0.5s ease-out;
+  }
+  .js [data-split].is-in {
+    opacity: 1;
+  }
+  .js [data-split] .w,
+  .js [data-split] .w > span {
+    display: inline;
+    overflow: visible;
+    transform: none;
+    transition: none;
+    padding: 0;
+    margin: 0;
+  }
+  .picker-result.is-swapping {
+    animation: none;
+  }
+}
+/* Probe used by script to read the full-screen height that does not change
+   when a phone browser's address bar hides or shows. */
+.vh-probe {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100vh;
+  height: 100lvh;
+  visibility: hidden;
+  pointer-events: none;
 }

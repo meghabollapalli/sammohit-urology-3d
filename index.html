@@ -67,20 +67,20 @@
     <div class="scroll-progress" aria-hidden="true"><span></span></div>
   </header>
 
-  <!-- Fixed 3D stage behind the journey. A still render shows first; the live scene loads later. -->
-  <div class="stage" id="stage" aria-hidden="true">
-    <picture class="stage-poster">
-      <source media="(min-width: 900px)" type="image/avif" srcset="./img/stage-desktop-1000.avif 1000w, ./img/stage-desktop.avif 1600w" sizes="100vw" />
-      <source media="(min-width: 900px)" srcset="./img/stage-desktop-1000.webp 1000w, ./img/stage-desktop.webp 1600w" sizes="100vw" />
-      <source type="image/avif" srcset="./img/stage-mobile.avif" />
-      <img src="./img/stage-mobile.webp" alt="" width="780" height="1688" fetchpriority="high" decoding="async" />
-    </picture>
-    <div id="webgl-container" class="stage-canvas"></div>
-    <div class="stage-scrim"></div>
-  </div>
-
   <main id="main" tabindex="-1">
     <div class="journey" id="journey">
+      <!-- 3D stage. Wide screens: fixed behind the journey. Phones: a panel pinned to the top while the text scrolls under it. A still render shows first; the live scene loads later. -->
+      <div class="stage" id="stage" aria-hidden="true">
+        <picture class="stage-poster">
+          <source media="(min-width: 900px)" type="image/avif" srcset="./img/stage-desktop-1000.avif 1000w, ./img/stage-desktop.avif 1600w" sizes="100vw" />
+          <source media="(min-width: 900px)" srcset="./img/stage-desktop-1000.webp 1000w, ./img/stage-desktop.webp 1600w" sizes="100vw" />
+          <source type="image/avif" srcset="./img/stage-mobile.avif" />
+          <img src="./img/stage-mobile.webp" alt="" width="780" height="744" fetchpriority="high" decoding="async" />
+        </picture>
+        <div id="webgl-container" class="stage-canvas"></div>
+        <div class="stage-scrim"></div>
+      </div>
+
       <nav class="chapters" aria-label="Treatment journey">
         <ol>
           <li><a href="#symptoms" data-chapter="symptoms"><span>01</span> Symptoms</a></li>
