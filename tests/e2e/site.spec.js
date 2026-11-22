@@ -185,3 +185,32 @@ test('chapter rail matches the chapter that is centred on screen', async ({ page
     }).toPass({ timeout: 20_000 });
   }
 });
+
+test('review carousel pages through the Google reviews', async ({ page }) => {
+  await page.goto('./');
+  const track = page.locator('.review-track');
+  await track.scrollIntoViewIfNeeded();
+  await expect(page.locator('.review-card')).not.toHaveCount(0);
+  const prev = page.getByRole('button', { name: 'Previous reviews' });
+  const next = page.getByRole('button', { name: 'Next reviews' });
+  await expect(prev).toBeDisabled();
+  await next.click();
+  await expect.poll(() => track.evaluate(el => el.scrollLeft)).toBeGreaterThan(50);
+  await expect(prev).toBeEnabled();
+});
+
+test('blog index and article pages open and link back', async ({ page }) => {
+  const errors = trackErrors(page);
+  await page.goto('./blog/index.html');
+  await expect(page.locator('h1')).toBeVisible();
+  await page.locator('.post-card a').first().click();
+  await expect(page.locator('article h1')).toBeVisible();
+  await expect(page.locator('.post-body')).toContainText('does not replace a consultation');
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(overflow).toBeLessThanOrEqual(0);
+  const results = await new AxeBuilder({ page }).analyze();
+  expect(results.violations.filter(v => ['serious', 'critical'].includes(v.impact))).toEqual([]);
+  await page.getByRole('link', { name: 'Book a consultation' }).click();
+  await expect(page).toHaveURL(/index\.html#book$/);
+  expect(errors).toEqual([]);
+});

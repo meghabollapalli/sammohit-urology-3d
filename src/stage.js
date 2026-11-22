@@ -4,7 +4,8 @@
  * - A still render (poster) is always shown first, so the page is complete
  *   without WebGL or JavaScript.
  * - The scene (and three.js) is a separate chunk loaded after the page is idle.
- * - With reduced motion or Data Saver on, it only loads when the visitor asks.
+ * - With reduced motion, Data Saver or a slow (2G/3G) connection, it only loads
+ *   when the visitor asks.
  * - Rendering pauses while the journey is off screen or the tab is hidden.
  */
 export function supportsWebGL() {
@@ -87,9 +88,11 @@ export function initStage() {
   if (!supportsWebGL()) return api;
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const saveData = Boolean(navigator.connection && navigator.connection.saveData);
+  const conn = navigator.connection;
+  const saveData = Boolean(conn && conn.saveData);
+  const slowNetwork = Boolean(conn && /(^|-)(2g|3g)$/.test(conn.effectiveType || ''));
 
-  if (reducedMotion || saveData) {
+  if (reducedMotion || saveData || slowNetwork) {
     if (loadBtn) {
       loadBtn.hidden = false;
       loadBtn.addEventListener('click', load, { once: true });

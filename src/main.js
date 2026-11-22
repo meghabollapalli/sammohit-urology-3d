@@ -133,3 +133,29 @@ document.querySelectorAll('[data-concern]').forEach(link =>
     if (select) select.value = link.dataset.concern;
   })
 );
+
+/* ---------------------------------------------------------------------------
+ * Review carousel: the list scrolls natively; the buttons page through it.
+ * ------------------------------------------------------------------------- */
+document.querySelectorAll('[data-carousel]').forEach(root => {
+  const track = root.querySelector('ul');
+  const buttons = [...root.querySelectorAll('[data-dir]')];
+  if (!track || !buttons.length) return;
+  const sync = () => {
+    const max = track.scrollWidth - track.clientWidth - 2;
+    buttons.forEach(b => {
+      b.disabled = Number(b.dataset.dir) < 0 ? track.scrollLeft <= 2 : track.scrollLeft >= max;
+    });
+  };
+  buttons.forEach(b =>
+    b.addEventListener('click', () => {
+      const card = track.firstElementChild;
+      const step = card ? card.getBoundingClientRect().width + 20 : track.clientWidth;
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      track.scrollBy({ left: Number(b.dataset.dir) * step, behavior: reduce ? 'auto' : 'smooth' });
+    })
+  );
+  track.addEventListener('scroll', sync, { passive: true });
+  window.addEventListener('resize', sync);
+  sync();
+});

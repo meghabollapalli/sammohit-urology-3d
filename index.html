@@ -8,6 +8,7 @@
   <link rel="canonical" href="{{siteUrl}}" />
   <meta name="theme-color" content="#06090d" />
   <meta name="color-scheme" content="dark light" />
+  <link rel="icon" href="./favicon.ico" sizes="any" />
   <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
 
@@ -23,8 +24,8 @@
   <meta property="og:image:alt" content="3D illustration of a human kidney" />
   <meta name="twitter:card" content="summary_large_image" />
 
-  <link rel="preload" as="image" href="./img/stage-mobile.webp" media="(max-width: 899px)" fetchpriority="high" />
-  <link rel="preload" as="image" href="./img/stage-desktop.webp" media="(min-width: 900px)" fetchpriority="high" />
+  <link rel="preload" as="image" type="image/avif" href="./img/stage-mobile.avif" media="(max-width: 899px)" fetchpriority="high" />
+  <link rel="preload" as="image" type="image/avif" imagesrcset="./img/stage-desktop-1000.avif 1000w, ./img/stage-desktop.avif 1600w" imagesizes="100vw" media="(min-width: 900px)" fetchpriority="high" />
   <script>document.documentElement.classList.add('js');</script>
   <link rel="stylesheet" href="/styles.css" />
   <!-- @jsonld -->
@@ -35,7 +36,7 @@
   <header class="site-header" id="top">
     <div class="header-inner">
       <a href="#main" class="brand" aria-label="{{clinicName}}, back to top">
-        <span class="brand-mark" aria-hidden="true">S</span>
+        <!-- @logo -->
         <span class="brand-text">
           <span class="brand-name">Sammohit</span>
           <span class="brand-sub">Urology &amp; Andrology</span>
@@ -48,8 +49,10 @@
           <li><a href="#prostate"><span class="nav-num" aria-hidden="true">02</span>Prostate</a></li>
           <li><a href="#andrology"><span class="nav-num" aria-hidden="true">03</span>Andrology</a></li>
           <li><a href="#doctor"><span class="nav-num" aria-hidden="true">04</span>Doctor</a></li>
-          <li><a href="#faq"><span class="nav-num" aria-hidden="true">05</span>Questions</a></li>
-          <li><a href="#visit"><span class="nav-num" aria-hidden="true">06</span>Visit</a></li>
+          <li data-requires="reviews"><a href="#reviews"><span class="nav-num" aria-hidden="true">05</span>Reviews</a></li>
+          <li data-requires="blog"><a href="#blog"><span class="nav-num" aria-hidden="true">06</span>{{blogTitle}}</a></li>
+          <li><a href="#faq"><span class="nav-num" aria-hidden="true">07</span>Questions</a></li>
+          <li><a href="#visit"><span class="nav-num" aria-hidden="true">08</span>Visit</a></li>
         </ul>
       </nav>
 
@@ -67,7 +70,9 @@
   <!-- Fixed 3D stage behind the journey. A still render shows first; the live scene loads later. -->
   <div class="stage" id="stage" aria-hidden="true">
     <picture class="stage-poster">
-      <source media="(min-width: 900px)" srcset="./img/stage-desktop.webp" />
+      <source media="(min-width: 900px)" type="image/avif" srcset="./img/stage-desktop-1000.avif 1000w, ./img/stage-desktop.avif 1600w" sizes="100vw" />
+      <source media="(min-width: 900px)" srcset="./img/stage-desktop-1000.webp 1000w, ./img/stage-desktop.webp 1600w" sizes="100vw" />
+      <source type="image/avif" srcset="./img/stage-mobile.avif" />
       <img src="./img/stage-mobile.webp" alt="" width="780" height="1688" fetchpriority="high" decoding="async" />
     </picture>
     <div id="webgl-container" class="stage-canvas"></div>
@@ -300,7 +305,10 @@
 
       <!-- In theatre: full-width photograph -->
       <figure class="theatre">
-        <img src="./img/theatre-wide.webp" srcset="./img/theatre-wide-800.webp 800w, ./img/theatre-wide.webp 1280w" sizes="100vw" width="1280" height="670" loading="lazy" decoding="async" alt="{{doctorName}} in the operating theatre, guiding a flexible telescope while the camera view shows on a monitor" />
+        <picture>
+          <source type="image/avif" srcset="./img/theatre-wide-480.avif 480w, ./img/theatre-wide-800.avif 800w, ./img/theatre-wide.avif 1280w" sizes="100vw" />
+          <img src="./img/theatre-wide.webp" srcset="./img/theatre-wide-480.webp 480w, ./img/theatre-wide-800.webp 800w, ./img/theatre-wide.webp 1280w" sizes="100vw" width="1280" height="670" loading="lazy" decoding="async" alt="{{doctorName}} in the operating theatre, guiding a flexible telescope while the camera view shows on a monitor" />
+        </picture>
         <figcaption>
           <span class="label">In the operating theatre</span>
           <span class="theatre-line">{{doctorName}} guides a flexible telescope, watching the camera view on the monitor.</span>
@@ -313,6 +321,16 @@
           <div class="section-head">
             <p class="label" data-reveal>(03) Andrology · Confidential</p>
             <h2 id="mens-title" class="display-xl" data-split>Private. One to one. <em>Without judgement.</em></h2>
+          </div>
+          <div class="andro-figs" data-reveal>
+            <figure>
+              <img src="./img/andrology-couple.svg" width="800" height="600" loading="lazy" decoding="async" alt="Illustration: a man sits on the edge of a bed with his head down while his partner rests a hand on his shoulder." />
+              <figcaption><strong>It affects both partners.</strong> Erection and ejaculation problems are common, and they often go unspoken at home for a long time.</figcaption>
+            </figure>
+            <figure>
+              <img src="./img/andrology-consult.svg" width="800" height="600" loading="lazy" decoding="async" alt="Illustration: a doctor and a patient talk across a desk in a consulting room." />
+              <figcaption><strong>It starts with a private conversation.</strong> One to one with the doctor, to find the cause and agree a plan.</figcaption>
+            </figure>
           </div>
           <div class="mens-grid">
             <div class="mens-intro" data-reveal>
@@ -362,7 +380,10 @@
         <div class="wrap doctor">
           <div class="doctor-photos" data-reveal>
             <figure class="doctor-plate">
-              <img src="./img/doctor-portrait.webp" width="413" height="516" loading="lazy" decoding="async" alt="Portrait of {{doctorName}}" />
+              <picture>
+                <source type="image/avif" srcset="./img/doctor-portrait-480.avif 480w, ./img/doctor-portrait.avif 826w" sizes="(min-width: 1000px) 413px, 90vw" />
+                <img src="./img/doctor-portrait.webp" srcset="./img/doctor-portrait-480.webp 480w, ./img/doctor-portrait.webp 826w" sizes="(min-width: 1000px) 413px, 90vw" width="413" height="516" loading="lazy" decoding="async" alt="Portrait of {{doctorName}}" />
+              </picture>
             </figure>
           </div>
           <div class="doctor-body">
@@ -387,29 +408,54 @@
         </div>
       </section>
 
-      <!-- Google rating: the figure and a link out only. Patient review text stays on Google. -->
-      <section class="section section-ink reviews" aria-labelledby="reviews-title" data-requires="reviews">
-        <div class="wrap reviews-wrap">
-          <div class="reviews-score" data-reveal>
-            <p class="reviews-figure"><span class="sr-only">Rated </span>{{reviewsRating}}<span class="sr-only"> out of 5 on Google</span></p>
-            <p class="reviews-stars" aria-hidden="true"><!-- @stars --></p>
-          </div>
-          <div class="reviews-body">
-            <p class="label" data-reveal>Patient reviews</p>
-            <h2 id="reviews-title" class="display-lg" data-split>{{reviewsCount}} reviews <em>on Google.</em></h2>
-            <p class="section-lead" data-reveal>
-              Patients rate and review the clinic on its public Google listing. Read every review there, in the patients’ own words, or add your own after a visit.
-            </p>
-            <div class="cta-row" data-reveal>
-              <a class="btn btn-accent" href="{{mapsUrl}}" target="_blank" rel="noopener"><span>Read all reviews on Google</span><i class="arrow arrow-out" aria-hidden="true"></i><span class="sr-only"> (opens in a new tab)</span></a>
+      <!-- Google reviews: rating from clinic.config.js, review text from src/content/reviews.js -->
+      <section class="section section-ink reviews" id="reviews" aria-labelledby="reviews-title" data-requires="reviews">
+        <div class="wrap">
+          <div class="reviews-head">
+            <div class="reviews-score" data-reveal>
+              <p class="reviews-figure"><span class="sr-only">Rated </span>{{reviewsRating}}<span class="sr-only"> out of 5 on Google</span></p>
+              <p class="reviews-stars" aria-hidden="true"><!-- @stars --></p>
             </div>
-            <p class="reviews-note" data-reveal>Rating as shown on Google on {{reviewsAsOf}}.</p>
+            <div class="reviews-body">
+              <p class="label" data-reveal>Patient reviews</p>
+              <h2 id="reviews-title" class="display-lg" data-split>Rated {{reviewsRating}} <em>on Google.</em></h2>
+              <p class="section-lead" data-reveal>
+                What patients have written on the clinic’s public Google listing, in their own words.
+              </p>
+            </div>
+          </div>
+          <div class="carousel" data-carousel data-requires="reviewtext">
+            <ul class="review-track" tabindex="0" aria-label="Patient reviews from Google">
+            <!-- @reviews -->
+            </ul>
+            <div class="carousel-nav">
+              <button type="button" class="carousel-btn" data-dir="-1" aria-label="Previous reviews"><i class="arrow arrow-back" aria-hidden="true"></i></button>
+              <button type="button" class="carousel-btn" data-dir="1" aria-label="Next reviews"><i class="arrow" aria-hidden="true"></i></button>
+            </div>
+          </div>
+          <div class="reviews-foot">
+            <a class="btn btn-accent" href="{{mapsUrl}}" target="_blank" rel="noopener"><span>Read all reviews on Google</span><i class="arrow arrow-out" aria-hidden="true"></i><span class="sr-only"> (opens in a new tab)</span></a>
+            <p class="reviews-note">Rating and reviews as shown on Google on {{reviewsAsOf}}. Reviews are quoted word for word, with names shortened.</p>
           </div>
         </div>
       </section>
 
+      <!-- Blog: latest posts from src/content/blog/*.md -->
+      <section class="section section-bone" id="blog" aria-labelledby="blog-title" data-requires="blog">
+        <div class="wrap">
+          <div class="section-head">
+            <p class="label" data-reveal>{{blogTitle}}</p>
+            <h2 id="blog-title" class="display-lg" data-split>Plain answers, <em>written down.</em></h2>
+          </div>
+          <ul class="post-list" data-reveal>
+          <!-- @blog -->
+          </ul>
+          <p class="post-all" data-reveal><a class="btn btn-dark" href="{{blogHref}}"><span>All articles</span><i class="arrow" aria-hidden="true"></i></a></p>
+        </div>
+      </section>
+
       <!-- FAQ -->
-      <section class="section section-bone" id="faq" aria-labelledby="faq-title">
+      <section class="section section-bone section-rule" id="faq" aria-labelledby="faq-title">
         <div class="wrap faq-layout">
           <div class="section-head">
             <p class="label" data-reveal>(05) Answers</p>

@@ -59,11 +59,11 @@ export const clinic = {
   ],
 
   /**
-   * Rating shown on the clinic's public Google listing, copied by hand on the
-   * `asOf` date. Update all three together, or set to `null` to hide the block.
-   * Patient review text is not reproduced on the site; visitors read it on Google.
+   * Rating shown on the clinic's Google listing, with the date it was read.
+   * Update both together, or set to `null` to hide the reviews section.
+   * The review text in the carousel lives in `src/content/reviews.js`.
    */
-  googleReviews: { rating: 5.0, count: 68, asOf: '2026-11-22' },
+  googleReviews: { rating: 5.0, asOf: '2026-11-22' },
 
   /** Public URL the site is served from (used for canonical + sitemap). */
   siteUrl: 'https://meghabollapalli.github.io/sammohit-urology-3d/'

@@ -5,6 +5,9 @@ import { clinic as fixtureClinic } from './tests/fixtures/clinic.fixture.js';
 import { faqs } from './src/content/faq.js';
 import { renderIndexHtml } from './src/lib/render.js';
 import { missingFields } from './src/lib/clinic-utils.js';
+import { reviews } from './src/content/reviews.js';
+import { BLOG, renderBlogIndex, renderBlogPost } from './src/lib/blog.js';
+import { loadPosts } from './src/lib/blog-node.js';
 
 // CLINIC_FIXTURE=1 builds with fake, fully filled contact details for end-to-end tests only.
 const useFixture = process.env.CLINIC_FIXTURE === '1';
@@ -42,7 +45,7 @@ function clinicHtml() {
             );
           }
         }
-        return renderIndexHtml(html, clinic, faqs);
+        return renderIndexHtml(html, clinic, faqs, { reviews, posts: loadPosts() });
       }
     }
   };
@@ -71,9 +74,38 @@ function preloadFonts() {
   };
 }
 
+/** Writes the blog index and one page per markdown post next to the main page. */
+function blogPages() {
+  const pages = cssHref => {
+    const posts = loadPosts();
+    if (!posts.length) return {};
+    const out = { [`${BLOG.dir}/index.html`]: renderBlogIndex(posts, clinic, cssHref) };
+    for (const post of posts) out[`${BLOG.dir}/${post.slug}.html`] = renderBlogPost(post, clinic, cssHref);
+    return out;
+  };
+  return {
+    name: 'blog-pages',
+    generateBundle(_, bundle) {
+      const css = Object.keys(bundle).find(f => f.endsWith('.css'));
+      for (const [fileName, source] of Object.entries(pages(`../${css}`))) {
+        this.emitFile({ type: 'asset', fileName, source });
+      }
+    },
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const path = (req.url || '').split('?')[0].replace(/^\//, '');
+        const html = path.startsWith(`${BLOG.dir}/`) ? pages('/styles.css')[path.endsWith('/') ? `${path}index.html` : path] : null;
+        if (!html) return next();
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.end(html);
+      });
+    }
+  };
+}
+
 export default defineConfig({
   base: './',
-  plugins: [clinicFixtureSwap(), clinicHtml(), preloadFonts()],
+  plugins: [clinicFixtureSwap(), clinicHtml(), preloadFonts(), blogPages()],
   test: { include: ['tests/unit/**/*.test.js'] },
   build: {
     target: 'es2020',
