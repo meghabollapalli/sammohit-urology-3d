@@ -40,6 +40,8 @@ export function whatsappHref(clinic, text = '') {
 export const CONCERNS = {
   stone: 'Kidney or ureter stone',
   prostate: 'Prostate / urine flow problems',
+  ed: 'Erectile dysfunction (confidential)',
+  pe: 'Premature ejaculation (confidential)',
   andrology: 'Andrology (confidential)',
   infertility: 'Male infertility',
   general: 'General urology or scan review'

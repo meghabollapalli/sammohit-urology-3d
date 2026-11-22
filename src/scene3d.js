@@ -208,9 +208,9 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     c.height = 64;
     const g = c.getContext('2d');
     const grad = g.createRadialGradient(32, 32, 2, 32, 32, 30);
-    grad.addColorStop(0, 'rgba(255,255,255,1)');
-    grad.addColorStop(0.35, 'rgba(255,235,190,0.85)');
-    grad.addColorStop(1, 'rgba(255,200,120,0)');
+    grad.addColorStop(0, 'rgba(255,255,255,0.95)');
+    grad.addColorStop(0.4, 'rgba(255,255,255,0.6)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
     g.fillStyle = grad;
     g.fillRect(0, 0, 64, 64);
     return new THREE.CanvasTexture(c);
@@ -834,17 +834,22 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
 
   const scopeTipBezel = new THREE.Mesh(
     new THREE.CylinderGeometry(0.052, 0.052, 0.09, 20),
-    new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.92, roughness: 0.15 })
+    new THREE.MeshStandardMaterial({ color: 0xaab4bf, metalness: 0.4, roughness: 0.5 })
   );
   scopeGroup.add(scopeTipBezel);
 
   const scopeHeadlamp = new THREE.PointLight(0xe0f2fe, 0, 2.2, 1.5);
   scopeGroup.add(scopeHeadlamp);
 
-  const laserBeamGeo = new THREE.CylinderGeometry(0.016, 0.022, 1.0, 16);
+  // The laser fibre: a hair-thin glass fibre that slides out of the scope and
+  // touches the stone. It does not glow; a real holmium or thulium laser is
+  // invisible, so the only light is a small steady aiming dot at the fibre tip.
+  const laserBeamGeo = new THREE.CylinderGeometry(0.009, 0.009, 1.0, 12);
   laserBeamGeo.translate(0, 0.5, 0);
-  const laserBeamMat = new THREE.MeshBasicMaterial({
-    color: 0x67e8f9,
+  const laserBeamMat = new THREE.MeshStandardMaterial({
+    color: 0x9fc4cf,
+    roughness: 0.35,
+    metalness: 0.1,
     transparent: true,
     opacity: 0
   });
@@ -853,12 +858,11 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   organRoot.add(laserBeamMesh);
 
   const plasmaFlashMesh = new THREE.Mesh(
-    new THREE.SphereGeometry(0.11, 20, 20),
-    new THREE.MeshBasicMaterial({ color: 0xecfeff, transparent: true, opacity: 0 })
+    new THREE.SphereGeometry(0.014, 12, 12),
+    new THREE.MeshBasicMaterial({ color: 0x3fae6a, transparent: true, opacity: 0 })
   );
+  plasmaFlashMesh.renderOrder = 3;
   organRoot.add(plasmaFlashMesh);
-  const laserFlashLight = new THREE.PointLight(0x22d3ee, 0, 3.4, 1.5);
-  organRoot.add(laserFlashLight);
 
   // The PCNL sheath enters through the back of the kidney's lower pole and
   // stops just short of the stone in the lower calyx.
@@ -868,10 +872,11 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     new THREE.Vector3(2.1, 3.02, 0.26),
     pcnlTip.clone()
   ]);
+  // Brushed steel, kept matte so it never blows out to white under the key light.
   const pcnlSheathMat = new THREE.MeshStandardMaterial({
-    color: 0xcbd5e1,
-    metalness: 0.85,
-    roughness: 0.20
+    color: 0x7f8c99,
+    metalness: 0.35,
+    roughness: 0.6
   });
   const pcnlSheathMesh = new THREE.Mesh(
     new THREE.TubeGeometry(pcnlCurve, 20, 0.062, 16, false),
@@ -979,13 +984,12 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   dustGeo.setAttribute('color', new THREE.BufferAttribute(dustColors, 3));
 
   const dustMat = new THREE.PointsMaterial({
-    size: 0.05,
+    size: 0.06,
     map: createSoftParticleSprite(),
     vertexColors: true,
     transparent: true,
-    opacity: 0.6,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending
+    opacity: 0.9,
+    depthWrite: false
   });
   const dustPoints = new THREE.Points(dustGeo, dustMat);
   dustPoints.renderOrder = 3;
@@ -1172,8 +1176,8 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     const symptomPulse = smoothstep(0.45, 0.9, j) * (1 - smoothstep(1.45, 1.9, j));
     const treat = smoothstep(1.4, 1.85, j) * (1 - smoothstep(2.5, 2.85, j));
     const laserOn = smoothstep(1.85, 1.97, j) * (1 - smoothstep(2.42, 2.52, j));
-    const erosion = smoothstep(2.1, 2.5, j);
-    const dustProgress = smoothstep(2.08, 2.6, j);
+    const erosion = smoothstep(1.98, 2.5, j);
+    const dustProgress = smoothstep(1.96, 2.6, j);
     const flushProgress = clamp01((j - 2.45) / 0.55);
     const prostateFocus = smoothstep(2.6, 3.0, j);
 
@@ -1202,7 +1206,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
       stoneMesh.position.copy(stoneCenter);
       stoneMesh.scale.setScalar(activeStoneRadius);
       stoneMesh.rotation.set(j * 2.6 + elapsed * 0.3, j * 3.4 + elapsed * 0.4, j * 1.8);
-      stoneMat.emissiveIntensity = 0.4 + symptomPulse * 0.25 + laserOn * 0.2;
+      stoneMat.emissiveIntensity = 0.4 + symptomPulse * 0.25 - laserOn * 0.15;
       stoneLight.position.copy(stoneCenter);
       stoneLight.position.z += 0.3;
       stoneLight.intensity = (0.3 + symptomPulse * 0.45) * intactScale;
@@ -1233,10 +1237,8 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     // Instruments.
     laserBeamMesh.visible = false;
     plasmaFlashMesh.visible = false;
-    laserFlashLight.intensity = 0;
     scopeHeadlamp.intensity = 0;
 
-    const pulse = 0.6 + 0.4 * Math.sin(elapsed * 38.0);
     const canFire = laserOn > 0.05 && intactScale > 0.04 && swapScale > 0.9;
     let laserFrom = null;
 
@@ -1245,7 +1247,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
       const desiredTipU = Math.min(0.99, pathU + lerp(0.05, 0.03, renalMix));
       const scopeInfo = rebuildScopeTube(1.07 - (1.07 - desiredTipU) * scopeReach);
       if (scopeInfo && scopeReach > 0.9) {
-        scopeHeadlamp.intensity = 0.55;
+        scopeHeadlamp.intensity = 0.2;
         if (appState.modality !== 'pcnl') laserFrom = scopeInfo.tipPos;
       }
     } else {
@@ -1258,21 +1260,20 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     if (pcnlReach > 0.9 && appState.modality === 'pcnl') laserFrom = PCNL_TIP;
 
     if (laserFrom && canFire) {
+      // The fibre reaches from the instrument to the stone's surface and follows
+      // the surface in as the stone is dusted away.
       beamDir.subVectors(stoneCenter, laserFrom);
-      const dist = beamDir.length();
+      const dist = Math.max(0.02, beamDir.length() - activeStoneRadius * 0.82);
+      beamDir.normalize();
       laserBeamMesh.visible = true;
       laserBeamMesh.position.copy(laserFrom);
-      laserBeamMesh.scale.set(1.6, dist, 1.6);
-      laserBeamMesh.quaternion.setFromUnitVectors(UP, beamDir.normalize());
-      laserBeamMat.opacity = 0.85 * laserOn * pulse;
+      laserBeamMesh.scale.set(1, dist, 1);
+      laserBeamMesh.quaternion.setFromUnitVectors(UP, beamDir);
+      laserBeamMat.opacity = 0.95 * laserOn;
 
       plasmaFlashMesh.visible = true;
-      plasmaFlashMesh.position.copy(stoneCenter).addScaledVector(beamDir, -activeStoneRadius * 0.8);
-      plasmaFlashMesh.scale.setScalar((0.3 + pulse * 0.22) * laserOn);
-      plasmaFlashMesh.material.opacity = 0.75 * laserOn;
-
-      laserFlashLight.position.copy(plasmaFlashMesh.position);
-      laserFlashLight.intensity = 0.9 * laserOn * pulse;
+      plasmaFlashMesh.position.copy(laserFrom).addScaledVector(beamDir, dist);
+      plasmaFlashMesh.material.opacity = 0.85 * laserOn;
     }
 
     // Fragments and dust wash down the tract after treatment.
@@ -1351,13 +1352,13 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
 
         const coolShift = Math.min(1, Math.max(0, (uTrack - 0.92) * 1.8));
         if (m.warm) {
-          dustColors[i * 3] = 1.0 - coolShift * 0.65;
-          dustColors[i * 3 + 1] = 0.76 + coolShift * 0.16;
-          dustColors[i * 3 + 2] = 0.32 + coolShift * 0.66;
+          dustColors[i * 3] = 0.74 - coolShift * 0.15;
+          dustColors[i * 3 + 1] = 0.44 + coolShift * 0.1;
+          dustColors[i * 3 + 2] = 0.12 + coolShift * 0.3;
         } else {
-          dustColors[i * 3] = 0.45;
-          dustColors[i * 3 + 1] = 0.92;
-          dustColors[i * 3 + 2] = 1.0;
+          dustColors[i * 3] = 0.6;
+          dustColors[i * 3 + 1] = 0.48;
+          dustColors[i * 3 + 2] = 0.3;
         }
       }
       pAttr.needsUpdate = true;

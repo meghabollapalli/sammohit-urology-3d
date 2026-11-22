@@ -33,6 +33,10 @@ export const faqs = [
     a: 'Both are common and usually treatable. Erectile problems are often linked to diabetes, blood pressure, heart health, hormones or stress, and can be an early sign of heart disease, so a proper check-up matters. Treatment is planned around the cause.'
   },
   {
+    q: 'What is Bimix or Trimix injection therapy?',
+    a: 'Bimix and Trimix are prescription medicine mixtures for erectile dysfunction, used when tablets do not work well enough or are not suitable. A very fine needle places a small dose into the side of the penis shortly before sex. The doctor checks that it is right for you, sets the dose in the clinic and teaches you how to use it safely. Like any medicine it can have side effects, which the doctor explains before you start.'
+  },
+  {
     q: 'What should I bring to my first visit?',
     a: 'Bring any scan reports and images (ultrasound, CT), recent blood and urine test results, old prescriptions or discharge summaries, and a list of the medicines you take, especially blood thinners.'
   },

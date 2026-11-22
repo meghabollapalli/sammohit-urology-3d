@@ -200,7 +200,6 @@ main:focus {
 .display-lg,
 .display-md,
 .proc-abbr,
-.wordmark,
 .footer-name,
 .faq-item summary {
   font-family: var(--serif);
@@ -825,7 +824,7 @@ main {
 
 @media (min-width: 1100px) {
   .hero-foot {
-    grid-template-columns: minmax(0, 34rem) auto;
+    grid-template-columns: minmax(0, 40rem) auto;
     justify-content: space-between;
     align-items: end;
   }
@@ -845,7 +844,8 @@ main {
 
 .hero-stats {
   display: grid;
-  grid-template-columns: repeat(3, auto);
+  grid-template-columns: repeat(2, auto);
+  justify-content: start;
   gap: 0;
   border-top: 1px solid var(--ink-line-2);
 }
@@ -1314,46 +1314,6 @@ html:not(.js) .seg[aria-pressed='true'] {
   }
 }
 
-/* Ticker */
-.ticker {
-  overflow: hidden;
-  padding: 34px 0;
-  border-top: 1px solid var(--ink-line);
-  border-bottom: 1px solid var(--ink-line);
-  background: var(--ink);
-}
-
-.ticker-track {
-  display: flex;
-  width: max-content;
-  animation: ticker 60s linear infinite;
-}
-
-.ticker span {
-  display: flex;
-  align-items: center;
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: clamp(2.2rem, 5vw, 4.6rem);
-  line-height: 1;
-  color: var(--fog);
-  white-space: nowrap;
-}
-
-.ticker span::after {
-  content: '✳';
-  margin: 0 0.6em;
-  font-style: normal;
-  font-size: 0.45em;
-  color: var(--accent);
-}
-
-@keyframes ticker {
-  to {
-    transform: translateX(-50%);
-  }
-}
-
 /* Conditions index */
 .index-list {
   border-top: 1px solid var(--bone-line);
@@ -1621,43 +1581,55 @@ html:not(.js) .seg[aria-pressed='true'] {
   overflow: hidden;
   background: #0d151c;
   border: 1px solid var(--ink-line);
+  margin: 0;
+}
+
+.doctor-plate img,
+.doctor-theatre img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.doctor-photos {
   display: grid;
-  place-items: center;
+  gap: 16px;
+  max-width: 520px;
 }
 
-.plate-glow {
-  position: absolute;
-  inset: -40%;
-  background: conic-gradient(from 0deg, rgba(255, 128, 72, 0.55), rgba(143, 220, 234, 0.25), rgba(6, 9, 13, 0) 40%, rgba(255, 128, 72, 0.35), rgba(6, 9, 13, 0) 75%, rgba(255, 128, 72, 0.55));
-  filter: blur(60px);
-  animation: spin 24s linear infinite;
+.doctor-theatre {
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--ink-line);
+  background: #0d151c;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(1turn);
-  }
+.doctor-theatre img {
+  aspect-ratio: 16 / 10;
 }
 
-.plate-mono {
-  position: relative;
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: clamp(8rem, 18vw, 15rem);
-  line-height: 1;
-  color: var(--bone);
-  letter-spacing: -0.04em;
+.doctor-theatre figcaption {
+  padding: 12px 16px;
+  font-size: 0.82rem;
+  color: var(--fog-3);
 }
 
-.plate-caption {
-  position: absolute;
-  left: 24px;
-  bottom: 22px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--fog-2);
+.focus-card {
+  margin: 1.6rem 0;
+  padding: 20px 22px;
+  border: 1px solid var(--bone-line);
+  border-left: 3px solid var(--accent-deep);
+  border-radius: 14px;
+  background: var(--bone-2);
+}
+
+.focus-card p {
+  margin-top: 0.7rem;
+  color: var(--umber-2);
+}
+
+.focus-card strong {
+  color: var(--umber);
 }
 
 .doctor-body .display-lg {
@@ -2018,26 +1990,6 @@ html:not(.js) .seg[aria-pressed='true'] {
   max-width: 44em;
 }
 
-.wordmark {
-  margin-top: 56px;
-  font-size: 23.5vw;
-  line-height: 0.74;
-  letter-spacing: -0.045em;
-  white-space: nowrap;
-  text-align: center;
-  background: linear-gradient(180deg, rgba(238, 241, 243, 0.14) 0%, rgba(238, 241, 243, 0) 85%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  user-select: none;
-}
-
-@media (min-width: 1360px) {
-  .wordmark {
-    font-size: 21rem;
-  }
-}
-
 /* Phone action bar */
 .action-bar {
   position: fixed;
@@ -2118,18 +2070,11 @@ html:not(.js) .seg[aria-pressed='true'] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ticker-track,
-  .plate-glow,
   .dot,
   .scroll-cue span {
     animation: none;
   }
 
-  .ticker-track {
-    flex-wrap: wrap;
-    width: auto;
-    padding: 0 var(--gutter);
-  }
 }
 
 /* Google rating */
@@ -2188,4 +2133,87 @@ html:not(.js) .seg[aria-pressed='true'] {
 }
 .reviews-body .section-lead {
   margin-top: 1.2rem;
+}
+
+/* Header: nothing in the bar may wrap. The phone number joins the bar only
+   once there is room for it beside the full navigation. */
+.brand,
+.primary-nav a,
+.header-actions > * {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+@media (min-width: 1180px) and (max-width: 1399px) {
+  .header-inner {
+    gap: 12px;
+  }
+  .primary-nav a {
+    padding: 10px 10px;
+  }
+  .primary-nav a::after {
+    left: 10px;
+    right: 10px;
+  }
+  .header-call {
+    display: none;
+  }
+}
+
+/* Kidney stone chapter: two cards. On wide screens they read as one column
+   beside the 3D view. On phones and tablets they are separate cards with open
+   space between them, so the anatomy stays visible above the procedure picker
+   while you switch between URSL, RIRS and PCNL. */
+.panel-card {
+  display: contents;
+}
+@media (max-width: 899px) {
+  #stones .chapter-panel {
+    padding: 0;
+    border: 0;
+    background: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  #stones .panel-card {
+    display: block;
+    padding: 24px 20px;
+    border: 1px solid var(--ink-line);
+    border-radius: var(--radius);
+    background: rgba(8, 12, 17, 0.82);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+  }
+  #stones .panel-card + .panel-card {
+    margin-top: 52svh;
+  }
+  #stones .panel-card .picker:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+}
+
+/* Small phones */
+@media (max-width: 479px) {
+  .hero-eyebrow .sep {
+    display: none;
+  }
+  .hero-eyebrow {
+    row-gap: 4px;
+  }
+}
+.proc-tag {
+  white-space: nowrap;
+}
+.proc-top {
+  flex-wrap: wrap;
+}
+@media (max-width: 359px) {
+  .btn {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .btn-block {
+    white-space: normal;
+  }
 }

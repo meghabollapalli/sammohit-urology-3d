@@ -39,6 +39,7 @@ export function buildJsonLd(clinic, faqs = []) {
       'Holmium laser enucleation of the prostate (HoLEP)',
       'Transurethral resection of the prostate (TURP)',
       'Erectile dysfunction treatment',
+      'Penile injection therapy (Bimix, Trimix) for erectile dysfunction',
       'Premature ejaculation treatment',
       'Male infertility and varicocele care'
     ].map(name => ({ '@type': 'MedicalProcedure', name }))
