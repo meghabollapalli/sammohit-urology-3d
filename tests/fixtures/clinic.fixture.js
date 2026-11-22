@@ -3,6 +3,7 @@ import { clinic as real } from '../../src/clinic.config.js';
 
 export const clinic = {
   ...real,
+  blogEnabled: true,
   doctor: { ...real.doctor, registrationNumber: 'TEST-REG-0001', languages: ['Telugu', 'Hindi', 'English'] },
   contact: { phone: '+91 90000 00001', whatsapp: '+91 90000 00002', email: 'desk@example.com' },
   address: { street: '1 Test Road', locality: 'Test Nagar', city: 'Testpur', region: 'Telangana', postalCode: '500001', country: 'IN' },

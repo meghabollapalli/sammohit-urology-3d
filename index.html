@@ -55,10 +55,10 @@
           <li><a href="#prostate"><span class="nav-num" aria-hidden="true">02</span>Prostate</a></li>
           <li><a href="#andrology"><span class="nav-num" aria-hidden="true">03</span>Andrology</a></li>
           <li><a href="#doctor"><span class="nav-num" aria-hidden="true">04</span>Doctor</a></li>
-          <li data-requires="reviews"><a href="#reviews"><span class="nav-num" aria-hidden="true">05</span>Reviews</a></li>
-          <li data-requires="blog"><a href="#blog"><span class="nav-num" aria-hidden="true">06</span>{{blogTitle}}</a></li>
-          <li><a href="#faq"><span class="nav-num" aria-hidden="true">07</span>Questions</a></li>
-          <li><a href="#visit"><span class="nav-num" aria-hidden="true">08</span>Visit</a></li>
+          <li data-requires="reviews"><a href="#reviews"><span class="nav-num" aria-hidden="true">{{numReviews}}</span>Reviews</a></li>
+          <li data-requires="blog"><a href="#blog"><span class="nav-num" aria-hidden="true">{{numBlog}}</span>{{blogTitle}}</a></li>
+          <li><a href="#faq"><span class="nav-num" aria-hidden="true">{{numFaq}}</span>Questions</a></li>
+          <li><a href="#visit"><span class="nav-num" aria-hidden="true">{{numVisit}}</span>Visit</a></li>
         </ul>
       </nav>
 
@@ -422,7 +422,7 @@
               <p class="reviews-stars" aria-hidden="true"><!-- @stars --></p>
             </div>
             <div class="reviews-body">
-              <p class="label" data-reveal>(05) Patient reviews</p>
+              <p class="label" data-reveal>({{numReviews}}) Patient reviews</p>
               <h2 id="reviews-title" class="display-lg" data-split>Rated {{reviewsRating}} <em>on Google.</em></h2>
               <p class="section-lead" data-reveal>
                 What patients have written on the clinic’s public Google listing, in their own words.
@@ -448,7 +448,7 @@
       <section class="section section-bone" id="blog" aria-labelledby="blog-title" data-requires="blog">
         <div class="wrap">
           <div class="section-head">
-            <p class="label" data-reveal>(06) {{blogTitle}}</p>
+            <p class="label" data-reveal>({{numBlog}}) {{blogTitle}}</p>
             <h2 id="blog-title" class="display-lg" data-split>Plain answers, <em>written down.</em></h2>
           </div>
           <ul class="post-list" data-reveal>
@@ -462,7 +462,7 @@
       <section class="section section-bone section-rule" id="faq" aria-labelledby="faq-title">
         <div class="wrap faq-layout">
           <div class="section-head">
-            <p class="label" data-reveal>(07) Answers</p>
+            <p class="label" data-reveal>({{numFaq}}) Answers</p>
             <h2 id="faq-title" class="display-lg" data-split>Questions <em>patients ask.</em></h2>
           </div>
           <div class="faq" data-reveal>
@@ -475,7 +475,7 @@
       <section class="section section-ink visit" id="visit" aria-labelledby="visit-title">
         <div class="wrap">
           <div class="section-head">
-            <p class="label" data-reveal>(08) Visit</p>
+            <p class="label" data-reveal>({{numVisit}}) Visit</p>
             <h2 id="visit-title" class="display-xl" data-split>Book a <em>consultation.</em></h2>
           </div>
           <div class="visit-grid">

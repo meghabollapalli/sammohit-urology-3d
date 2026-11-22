@@ -141,7 +141,12 @@ describe('blog', () => {
     const html = renderIndexHtml(template, shipped, faqs, { posts });
     expect(posts.length).toBeGreaterThan(0);
     for (const p of posts.slice(0, 3)) expect(html).toContain(`href="./blog/${p.slug}.html"`);
-    expect(renderIndexHtml(template, shipped, faqs)).not.toContain('id="blog"');
+    const off = renderIndexHtml(template, shipped, faqs);
+    expect(off).not.toContain('id="blog"');
+    expect(off).not.toContain('href="#blog"');
+    // Later sections close the gap in the numbering.
+    expect(html).toContain('(07) Answers');
+    expect(off).toContain('(06) Answers');
   });
 
   it('marks draft posts and keeps search engines away from them', () => {

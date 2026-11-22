@@ -64,6 +64,13 @@ export const clinic = {
    */
   googleReviews: { rating: 5.0 },
 
+  /**
+   * Blog on/off. `false` hides the Blog section and menu link on the main page
+   * and leaves the blog pages out of the build. The articles in
+   * `src/content/blog/` are kept; set to `true` to bring it all back.
+   */
+  blogEnabled: false,
+
   /** Public URL the site is served from (used for canonical + sitemap). */
   siteUrl: 'https://meghabollapalli.github.io/sammohit-urology-3d/'
 };

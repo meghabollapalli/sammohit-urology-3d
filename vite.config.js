@@ -20,6 +20,9 @@ const FIXTURE_PATH = fileURLToPath(new URL('./tests/fixtures/clinic.fixture.js',
  *  import of the real file (`../../src/clinic.config.js`) is left alone. */
 const fixtureAlias = useFixture ? [{ find: /^\.\.?\/clinic\.config\.js$/, replacement: FIXTURE_PATH }] : [];
 
+/** The blog's posts, or none while `blogEnabled` is off in the clinic config. */
+const blogPosts = () => (clinic.blogEnabled ? loadPosts() : []);
+
 function clinicHtml() {
   let warned = false;
   return {
@@ -37,7 +40,7 @@ function clinicHtml() {
             );
           }
         }
-        return renderIndexHtml(html, clinic, faqs, { reviews, posts: loadPosts() });
+        return renderIndexHtml(html, clinic, faqs, { reviews, posts: blogPosts() });
       }
     }
   };
@@ -69,7 +72,7 @@ function preloadFonts() {
 /** Writes the blog index and one page per markdown post next to the main page. */
 function blogPages() {
   const pages = cssHref => {
-    const posts = loadPosts();
+    const posts = blogPosts();
     if (!posts.length) return {};
     const out = { [`${BLOG.dir}/index.html`]: renderBlogIndex(posts, clinic, cssHref) };
     for (const post of posts) out[`${BLOG.dir}/${post.slug}.html`] = renderBlogPost(post, clinic, cssHref);
