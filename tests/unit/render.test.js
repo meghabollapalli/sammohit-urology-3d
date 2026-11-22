@@ -100,7 +100,6 @@ describe('Google reviews section', () => {
 
   it('shows the rating and date from the config, without a review count', () => {
     expect(html).toContain('Rated 5.0 <em>on Google.</em>');
-    expect(html).toContain('as shown on Google on 22 November 2026.');
     expect(html).toContain('Read all reviews on Google');
     expect(html).toContain('href="#reviews"');
     expect(html).not.toMatch(/\b68\b/);

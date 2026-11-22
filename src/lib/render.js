@@ -101,11 +101,7 @@ function renderVisitDetails(clinic) {
         : '<span class="muted">Please call or message before visiting to confirm timings.</span>'
     }</dd></div>`
   );
-  if (telHref(clinic)) {
-    rows.push(
-      `<div class="visit-row"><dt>Phone</dt><dd><a href="${escapeHtml(telHref(clinic))}">${escapeHtml(formatPhone(clinic.contact.phone))}</a></dd></div>`
-    );
-  }
+  // The phone number is not listed here: the Call button under the list carries it.
   if (clinic.contact?.whatsapp && whatsappHref(clinic)) {
     rows.push(
       `<div class="visit-row"><dt>WhatsApp</dt><dd><a href="${escapeHtml(whatsappHref(clinic))}" target="_blank" rel="noopener">${escapeHtml(formatPhone(clinic.contact.whatsapp))}</a></dd></div>`

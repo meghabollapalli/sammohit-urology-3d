@@ -1398,9 +1398,11 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
       camTargetLook.set(focus.x + desktopShiftX, focus.y, 0);
     } else {
       // Phones and tablets: the canvas is the panel pinned above the text, so
-      // the anatomy sits in the middle of it. Narrow panels pull back a little.
+      // the anatomy sits in the middle of it. The framing depends only on the
+      // panel's height (like the wide layout), so the still image shown before
+      // the scene loads can be laid over it exactly at any width.
       // The look point sits a little high to keep the anatomy clear of the header.
-      const fit = Math.max(1.08, 1.2 / camera.aspect);
+      const fit = 1.15;
       const lift = 0.3 * (camDist / 6);
       camPosGoal.set(focus.x + sway * 0.5, focus.y + lift + camElev, camDist * fit);
       camTargetLook.set(focus.x, focus.y + lift, 0);

@@ -24,8 +24,8 @@
   <meta property="og:image:alt" content="3D illustration of a human kidney" />
   <meta name="twitter:card" content="summary_large_image" />
 
-  <link rel="preload" as="image" type="image/avif" href="./img/stage-mobile.avif" media="(max-width: 899px)" fetchpriority="high" />
-  <link rel="preload" as="image" type="image/avif" imagesrcset="./img/stage-desktop-1000.avif 1000w, ./img/stage-desktop.avif 1600w" imagesizes="100vw" media="(min-width: 900px)" fetchpriority="high" />
+  <link rel="preload" as="image" type="image/avif" imagesrcset="./img/stage-mobile-880.avif 880w, ./img/stage-mobile.avif 1760w" imagesizes="106vh" media="(max-width: 899px)" fetchpriority="high" />
+  <link rel="preload" as="image" type="image/avif" imagesrcset="./img/stage-desktop-1200.avif 1200w, ./img/stage-desktop.avif 2400w" imagesizes="240vh" media="(min-width: 900px)" fetchpriority="high" />
   <script>document.documentElement.classList.add('js');</script>
   <link rel="stylesheet" href="/styles.css" />
   <!-- @jsonld -->
@@ -72,10 +72,10 @@
       <!-- 3D stage. Wide screens: fixed behind the journey. Phones: a panel pinned to the top while the text scrolls under it. A still render shows first; the live scene loads later. -->
       <div class="stage" id="stage" aria-hidden="true">
         <picture class="stage-poster">
-          <source media="(min-width: 900px)" type="image/avif" srcset="./img/stage-desktop-1000.avif 1000w, ./img/stage-desktop.avif 1600w" sizes="100vw" />
-          <source media="(min-width: 900px)" srcset="./img/stage-desktop-1000.webp 1000w, ./img/stage-desktop.webp 1600w" sizes="100vw" />
-          <source type="image/avif" srcset="./img/stage-mobile.avif" />
-          <img src="./img/stage-mobile.webp" alt="" width="780" height="744" fetchpriority="high" decoding="async" />
+          <source media="(min-width: 900px)" type="image/avif" srcset="./img/stage-desktop-1200.avif 1200w, ./img/stage-desktop.avif 2400w" sizes="240vh" />
+          <source media="(min-width: 900px)" srcset="./img/stage-desktop-1200.webp 1200w, ./img/stage-desktop.webp 2400w" sizes="240vh" width="2400" height="1000" />
+          <source type="image/avif" srcset="./img/stage-mobile-880.avif 880w, ./img/stage-mobile.avif 1760w" sizes="106vh" />
+          <img src="./img/stage-mobile.webp" srcset="./img/stage-mobile-880.webp 880w, ./img/stage-mobile.webp 1760w" sizes="106vh" alt="" width="1760" height="732" fetchpriority="high" decoding="async" />
         </picture>
         <div id="webgl-container" class="stage-canvas"></div>
         <div class="stage-scrim"></div>
@@ -435,7 +435,6 @@
           </div>
           <div class="reviews-foot">
             <a class="btn btn-accent" href="{{mapsUrl}}" target="_blank" rel="noopener"><span>Read all reviews on Google</span><i class="arrow arrow-out" aria-hidden="true"></i><span class="sr-only"> (opens in a new tab)</span></a>
-            <p class="reviews-note">Rating and reviews as shown on Google on {{reviewsAsOf}}. Reviews are quoted word for word, with names shortened.</p>
           </div>
         </div>
       </section>
@@ -480,7 +479,7 @@
               <!-- @visit-details -->
               <div class="cta-row cta-pair">
                 <a class="btn btn-line" href="{{mapsUrl}}" target="_blank" rel="noopener"><span>Open in Google Maps</span><i class="arrow arrow-out" aria-hidden="true"></i><span class="sr-only"> (opens in a new tab)</span></a>
-                <a class="btn btn-line" href="{{tel}}" data-requires="phone"><span>Call the clinic</span></a>
+                <a class="btn btn-line" href="{{tel}}" data-requires="phone"><span>Call {{phoneDisplay}}</span></a>
               </div>
             </div>
 
