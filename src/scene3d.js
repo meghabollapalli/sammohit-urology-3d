@@ -1393,13 +1393,20 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     const e01 = smoothstep(0, 1, j);
     const e12 = smoothstep(1, 2, j);
     const e23 = smoothstep(2.4, 3, j);
-    focus.set(lerp(lerp(0.65, 0.8, e01), 0.95, e12), lerp(lerp(4.15, 3.5, e01), 3.1, e12), 0);
+    const wide = window.innerWidth >= 900;
+    if (wide) {
+      focus.set(lerp(lerp(0.65, 0.8, e01), 0.95, e12), lerp(lerp(4.15, 3.5, e01), 3.1, e12), 0);
+    } else {
+      // Phones: the panel is narrow, so the look point moves to the middle of
+      // the kidney, its vessels and the stone in the ureter, not just the kidney.
+      focus.set(lerp(0.65, 0.35, e01), lerp(lerp(4.15, 4.05, e01), 3.75, e12), 0);
+    }
     if (e23 > 0) focus.lerp(tractPoint(e23, tractPt), smoothstep(0, 0.3, e23));
     const camDist = lerp(lerp(lerp(6.2, 6.6, e01), 7.0, e12), 5.9, e23) - Math.sin(e23 * Math.PI) * 0.5;
     const camElev = lerp(lerp(lerp(0.35, 0.25, e01), 0.15, e12), 0.18, e23);
     const sway = Math.sin(j * 1.25) * 0.3 * (1 - treat);
 
-    if (window.innerWidth >= 900) {
+    if (wide) {
       const desktopShiftX = -1.65 * (camDist / 5.8);
       camPosGoal.set(focus.x + desktopShiftX + sway, focus.y + camElev, camDist);
       camTargetLook.set(focus.x + desktopShiftX, focus.y, 0);
@@ -1409,7 +1416,8 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
       // panel's height (like the wide layout), so the still image shown before
       // the scene loads can be laid over it exactly at any width.
       // The look point sits a little high to keep the anatomy clear of the header.
-      const fit = 1.15;
+      // Pulled back a little while the stone is on screen so the whole group fits.
+      const fit = lerp(lerp(1.15, 1.32, e01), 1.15, e23);
       const lift = 0.3 * (camDist / 6);
       camPosGoal.set(focus.x + sway * 0.5, focus.y + lift + camElev, camDist * fit);
       camTargetLook.set(focus.x, focus.y + lift, 0);

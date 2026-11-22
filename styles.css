@@ -2471,8 +2471,54 @@ html:not(.js) .seg[aria-pressed='true'] {
   .hero-eyebrow .sep {
     display: none;
   }
+  /* A plain line of text here: as a flex row the dot was left alone on its
+     own line when the name and degrees wrapped. */
   .hero-eyebrow {
-    row-gap: 4px;
+    display: block;
+    line-height: 1.7;
+  }
+  .hero-eyebrow .dot {
+    display: inline-block;
+    margin-right: 10px;
+    vertical-align: 0.08em;
+  }
+}
+
+/* Very narrow screens: nothing may be wider than the screen, or the phone
+   zooms the whole page out and the 3D panel no longer spans it. */
+@media (max-width: 339px) {
+  .brand-sub {
+    display: none;
+  }
+  .doctor,
+  .mens-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .mens-grid .btn {
+    white-space: normal;
+  }
+  .facts,
+  .facts > div {
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
+  }
+  .facts dd {
+    overflow-wrap: anywhere;
+  }
+  .segmented {
+    grid-template-columns: repeat(var(--count), minmax(0, 1fr));
+  }
+  .seg {
+    padding: 0 2px;
+    font-size: 0.8rem;
+    letter-spacing: -0.01em;
+  }
+  .doctor-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .doctor-stats li + li {
+    padding-left: 0;
+    border-left: 0;
   }
 }
 .proc-tag {
