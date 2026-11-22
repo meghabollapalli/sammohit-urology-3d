@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" role="img" aria-labelledby="t"><title id="t">A doctor and a patient sit facing each other across a small desk, talking in private.</title>
+<rect width="480" height="320" fill="#e7e0d4"/>
+<path d="M30 292h420" stroke="#17130e" stroke-width="3" stroke-linecap="round"/>
+<rect x="352" y="60" width="74" height="96" rx="6" fill="#fbf8f2" stroke="#b9ae9c" stroke-width="3"/>
+<path d="M366 84h46M366 102h46M366 120h30" stroke="#b9ae9c" stroke-width="3" stroke-linecap="round"/>
+<path d="M196 212h88" stroke="#17130e" stroke-width="8" stroke-linecap="round"/><path d="M240 214v78M218 292h44" stroke="#17130e" stroke-width="4" stroke-linecap="round"/>
+<rect x="246" y="194" width="30" height="16" rx="2" fill="#fbf8f2" stroke="#17130e" stroke-width="3"/>
+<g fill="none" stroke-linecap="round" stroke-linejoin="round">
+<path d="M96 150v142M96 232h56v60" stroke="#17130e" stroke-width="4"/>
+<path d="M124 226 130 160" stroke="#17130e" stroke-width="38"/><path d="M124 226 130 160" stroke="#fbf8f2" stroke-width="32"/>
+<g stroke="#4d463c"><path d="M126 228h54v58" stroke-width="22"/></g>
+<path d="M134 168 172 196 200 200" stroke="#17130e" stroke-width="19"/><path d="M134 168 172 196 200 200" stroke="#fbf8f2" stroke-width="13"/>
+<path d="M121 150q-3 24 9 30q12-6 10-30" stroke="#17130e" stroke-width="3"/><circle cx="130" cy="182" r="4.5" fill="#17130e" stroke="none"/>
+<circle cx="134" cy="122" r="19" fill="#6b6357" stroke="none"/><path d="M118 114q12-16 32-6" stroke="#17130e" stroke-width="10"/>
+<path d="M384 150v142M384 232h-56v60" stroke="#17130e" stroke-width="4"/>
+<g stroke="#a83d0c"><path d="M356 226 350 160" stroke-width="32"/></g>
+<g stroke="#4d463c"><path d="M354 228h-54v58" stroke-width="22"/></g>
+<path d="M346 168 316 198 296 204" stroke="#a83d0c" stroke-width="15"/>
+<circle cx="346" cy="122" r="19" fill="#4d463c" stroke="none"/><path d="M330 110q20-12 34 4" stroke="#17130e" stroke-width="10"/>
+</g></svg>
