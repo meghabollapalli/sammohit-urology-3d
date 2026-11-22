@@ -4,10 +4,13 @@
  *
  * Returns a number from 0 to 3: 0 = hero, 1 = symptoms, 2 = stone treatment,
  * 3 = bladder and prostate. It sits exactly on a whole number while that
- * chapter's panel is centred in the viewport (or fills it, when the panel is
- * taller than the screen) and moves evenly between chapters.
+ * chapter is centred in the viewport (or fills it, when the chapter is taller
+ * than the screen) and moves evenly between chapters.
+ *
+ * The stops are the chapter sections themselves, not the text cards inside
+ * them: on phones the cards are sticky, so their position changes as you scroll.
  */
-const STOPS = ['.hero', '#symptoms .chapter-panel', '#stones .chapter-panel', '#prostate .chapter-panel'];
+const STOPS = ['.hero', '#symptoms', '#stones', '#prostate'];
 let stopEls = null;
 
 export function journeyRanges(doc = document, win = window) {

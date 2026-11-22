@@ -2141,40 +2141,6 @@ html:not(.js) .seg[aria-pressed='true'] {
   }
 }
 
-/* Kidney stone chapter: two cards. On wide screens they read as one column
-   beside the 3D view. On phones and tablets they are separate cards with open
-   space between them, so the anatomy stays visible above the procedure picker
-   while you switch between URSL, RIRS and PCNL. */
-.panel-card {
-  display: contents;
-}
-@media (max-width: 899px) {
-  #stones .chapter-panel {
-    padding: 0;
-    border: 0;
-    background: none;
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-  #stones .panel-card {
-    display: block;
-    padding: 24px 20px;
-    border: 1px solid var(--ink-line);
-    border-radius: var(--radius);
-    background: rgba(8, 12, 17, 0.82);
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
-  }
-  #stones .panel-card + .panel-card {
-    margin-top: 52svh;
-  }
-  #stones .panel-card .picker:first-child {
-    margin-top: 0;
-    padding-top: 0;
-    border-top: 0;
-  }
-}
-
 /* Small phones */
 @media (max-width: 479px) {
   .hero-eyebrow .sep {
@@ -2240,33 +2206,75 @@ html:not(.js) .seg[aria-pressed='true'] {
   }
 }
 
-/* Andrology illustrations */
-.andro-figs {
-  display: grid;
-  gap: 20px;
-  margin-bottom: clamp(2.4rem, 5vw, 4rem);
+/* Chapter cards.
+   Wide screens: the cards of a chapter read as one column beside the 3D view.
+   Phones and tablets: the 3D view owns the top half of the screen. Each card is
+   a short sheet pinned above the action bar; scrolling swaps one sheet for the
+   next, so the anatomy is never covered. */
+.panel-card,
+.panel-card > .card {
+  display: contents;
 }
-@media (min-width: 700px) {
-  .andro-figs {
-    grid-template-columns: 1fr 1fr;
-    gap: 28px;
+@media (max-width: 899px) {
+  .journey .chapter {
+    display: block;
+    min-height: 0;
+    padding: 0 12px;
   }
-}
-.andro-figs figure {
-  margin: 0;
-}
-.andro-figs img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border: 1px solid var(--bone-line);
-  border-radius: 20px;
-}
-.andro-figs figcaption {
-  margin-top: 14px;
-  max-width: 34em;
-  color: var(--umber-2);
-}
-.andro-figs strong {
-  color: var(--umber);
+  .journey .chapter .chapter-panel {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .panel-card {
+    display: flex;
+    align-items: flex-end;
+    min-height: 150svh;
+    padding-top: 50svh;
+  }
+  .panel-card > .card {
+    display: block;
+    position: sticky;
+    bottom: 96px;
+    width: 100%;
+    max-width: 560px;
+    max-height: calc(50svh - 24px);
+    overflow-y: auto;
+    padding: 18px 18px 20px;
+    border: 1px solid var(--ink-line);
+    border-radius: var(--radius);
+    background: rgba(8, 12, 17, 0.9);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+  }
+  .panel-card .display-md {
+    font-size: clamp(1.7rem, 7.4vw, 2.4rem);
+  }
+  .panel-card .chapter-label {
+    margin-bottom: 0.7rem;
+  }
+  .panel-card .chapter-body,
+  .panel-card .picker-result,
+  .panel-card .triage li {
+    font-size: 0.92rem;
+  }
+  .panel-card .picker-result {
+    min-height: 0;
+  }
+  .panel-card .card > :first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+  .panel-card .fineprint {
+    margin-top: 10px;
+    font-size: 0.74rem;
+  }
+  .panel-card .cta-row {
+    margin-top: 1rem;
+  }
 }

@@ -76,6 +76,7 @@ export function initMotion() {
   const chapterLinks = [...document.querySelectorAll('.chapters a')];
   const journeyEnd = document.getElementById('journey-end-anchor');
   const CHAPTERS = [null, 'symptoms', 'stones', 'prostate'];
+  const sheetCards = [...document.querySelectorAll('.panel-card > .card')];
   let ticking = false;
   const onScroll = () => {
     ticking = false;
@@ -84,6 +85,18 @@ export function initMotion() {
     if (header) {
       header.classList.toggle('is-scrolled', y > 24);
       header.style.setProperty('--progress', max > 0 ? (y / max).toFixed(4) : '0');
+    }
+    // Phones: a chapter card is pinned above the action bar. When its part of
+    // the chapter ends it rides up the screen; fade it out as it leaves so it
+    // never crosses the 3D view.
+    if (sheetCards.length) {
+      const pinned = window.innerWidth < 900;
+      const line = window.innerHeight - 96;
+      sheetCards.forEach(card => {
+        const gone = pinned ? Math.min(1, Math.max(0, (line - card.getBoundingClientRect().bottom - 8) / 90)) : 0;
+        card.style.opacity = gone > 0 ? (1 - gone).toFixed(3) : '';
+        card.style.pointerEvents = gone > 0.6 ? 'none' : '';
+      });
     }
     if (chapterLinks.length) {
       const j = journeyValue();

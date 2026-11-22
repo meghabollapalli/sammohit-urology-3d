@@ -179,7 +179,7 @@ test('chapter rail matches the chapter that is centred on screen', async ({ page
       await page.evaluate(sel => {
         const r = document.querySelector(sel).getBoundingClientRect();
         window.scrollTo({ top: r.top + window.scrollY + r.height / 2 - window.innerHeight / 2, behavior: 'instant' });
-      }, `#${id} .chapter-panel`);
+      }, `#${id}`);
       await expect(page.locator(`.chapters a[data-chapter="${id}"]`)).toHaveClass(/is-active/, { timeout: 1500 });
       await expect(page.locator('.chapters a.is-active')).toHaveCount(1, { timeout: 1500 });
     }).toPass({ timeout: 20_000 });

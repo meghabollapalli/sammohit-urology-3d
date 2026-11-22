@@ -657,7 +657,9 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   // 6. 3D CUTAWAY TRANSLUCENT URINARY BLADDER, FLUID POOL & PROSTATE COLLAR
   // =========================================================================
   const bladderGroup = new THREE.Group();
-  bladderGroup.position.set(0.18, -4.95, 0.08);
+  // This is the left kidney seen from the front, so the body's midline, the
+  // bladder and the prostate sit to the screen-left of where its ureter ends.
+  bladderGroup.position.set(-0.26, -4.95, 0.08);
   organRoot.add(bladderGroup);
 
   const bladderPts = [];
@@ -752,10 +754,11 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   prostateMesh.position.set(0, -1.28, 0);
   bladderGroup.add(prostateMesh);
 
-  const leftUreterStump = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(0.95, -3.25, -0.06),
-    new THREE.Vector3(0.66, -3.82, 0.02),
-    new THREE.Vector3(0.42, -4.28, 0.10)
+  // The other (right) ureter, entering the far side of the bladder.
+  const otherUreterStump = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(-1.03, -3.25, -0.06),
+    new THREE.Vector3(-0.74, -3.82, 0.02),
+    new THREE.Vector3(-0.50, -4.28, 0.10)
   ]);
   const stumpMat = new THREE.MeshStandardMaterial({
     color: 0xc97a78,
@@ -764,7 +767,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     opacity: 0.3
   });
   organRoot.add(
-    new THREE.Mesh(new THREE.TubeGeometry(leftUreterStump, 24, 0.11, 16, false), stumpMat)
+    new THREE.Mesh(new THREE.TubeGeometry(otherUreterStump, 24, 0.11, 16, false), stumpMat)
   );
 
   // =========================================================================
@@ -897,9 +900,9 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     }
 
     const pts = [
-      new THREE.Vector3(0.18, -6.75, 0.08),
-      new THREE.Vector3(0.18, -5.85, 0.08),
-      new THREE.Vector3(0.06, -5.05, 0.10),
+      new THREE.Vector3(-0.26, -6.75, 0.08),
+      new THREE.Vector3(-0.26, -5.85, 0.08),
+      new THREE.Vector3(-0.16, -5.05, 0.10),
       new THREE.Vector3(-0.04, -4.28, 0.12)
     ];
 
@@ -1122,7 +1125,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   const SITE_KIDNEY = -RENAL_SPAN; // lower calyx: where the stone forms, and where RIRS or PCNL treats it
   const SITE_ORIGIN = SITE_KIDNEY;
   const SITE_URETER = 0.22; // stuck in the upper ureter (treated by URSL)
-  const PROSTATE_FOCUS = new THREE.Vector3(0.15, -5.45, 0);
+  const PROSTATE_FOCUS = new THREE.Vector3(-0.26, -5.45, 0);
   const PCNL_TIP = pcnlTip;
   const UP = new THREE.Vector3(0, 1, 0);
   const lerp = (a, b, t) => a + (b - a) * t;
@@ -1345,7 +1348,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
           }
           const funnelR = Math.max(0.06, (1 - Math.min(1, bT * 0.78)) * 0.78) * m.radial;
           const swirlAng = m.angle + elapsed * 2.2 + bT * 6.5;
-          dustPos[i * 3] = 0.18 + Math.cos(swirlAng) * funnelR;
+          dustPos[i * 3] = -0.26 + Math.cos(swirlAng) * funnelR;
           dustPos[i * 3 + 1] = -4.32 - bT * 1.75;
           dustPos[i * 3 + 2] = 0.08 + Math.sin(swirlAng) * funnelR * 0.72;
         }
