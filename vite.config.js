@@ -15,18 +15,10 @@ const clinic = useFixture ? fixtureClinic : realClinic;
 
 const FIXTURE_PATH = fileURLToPath(new URL('./tests/fixtures/clinic.fixture.js', import.meta.url));
 
-/** In fixture builds, the browser bundle imports the fixture instead of the real config. */
-function clinicFixtureSwap() {
-  return {
-    name: 'clinic-fixture-swap',
-    enforce: 'pre',
-    async resolveId(source, importer, options) {
-      if (!useFixture || !source.endsWith('clinic.config.js') || importer === FIXTURE_PATH) return null;
-      const resolved = await this.resolve(source, importer, { ...options, skipSelf: true });
-      return resolved && resolved.id.endsWith('/src/clinic.config.js') ? FIXTURE_PATH : null;
-    }
-  };
-}
+/** In fixture builds, the browser bundle imports the fixture instead of the real config.
+ *  Only `./clinic.config.js` and `../clinic.config.js` match, so the fixture's own
+ *  import of the real file (`../../src/clinic.config.js`) is left alone. */
+const fixtureAlias = useFixture ? [{ find: /^\.\.?\/clinic\.config\.js$/, replacement: FIXTURE_PATH }] : [];
 
 function clinicHtml() {
   let warned = false;
@@ -105,7 +97,8 @@ function blogPages() {
 
 export default defineConfig({
   base: './',
-  plugins: [clinicFixtureSwap(), clinicHtml(), preloadFonts(), blogPages()],
+  resolve: { alias: fixtureAlias },
+  plugins: [clinicHtml(), preloadFonts(), blogPages()],
   test: { include: ['tests/unit/**/*.test.js'] },
   build: {
     target: 'es2020',

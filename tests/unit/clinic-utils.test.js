@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clinic as real } from '../fixtures/clinic.empty.js';
+import { clinic as empty } from '../fixtures/clinic.empty.js';
 import { clinic as full } from '../fixtures/clinic.fixture.js';
 import {
   bookingChannel,
@@ -26,8 +26,8 @@ describe('phone helpers', () => {
   });
 
   it('builds tel and WhatsApp links only when a number exists', () => {
-    expect(telHref(real)).toBeNull();
-    expect(whatsappHref(real)).toBeNull();
+    expect(telHref(empty)).toBeNull();
+    expect(whatsappHref(empty)).toBeNull();
     expect(telHref(full)).toBe('tel:+919000000001');
     expect(whatsappHref(full, 'Hi there')).toBe('https://wa.me/919000000002?text=Hi%20there');
   });
@@ -40,7 +40,7 @@ describe('phone helpers', () => {
 
 describe('booking', () => {
   it('chooses the best available channel', () => {
-    expect(bookingChannel(real)).toBeNull();
+    expect(bookingChannel(empty)).toBeNull();
     expect(bookingChannel(full)).toBe('whatsapp');
     expect(bookingChannel({ ...full, contact: { phone: '+919000000001' } })).toBe('whatsapp');
   });
@@ -64,8 +64,8 @@ describe('booking', () => {
 
 describe('address and hours', () => {
   it('returns null when unknown', () => {
-    expect(formatAddress(real)).toBeNull();
-    expect(formatHours(real)).toBeNull();
+    expect(formatAddress(empty)).toBeNull();
+    expect(formatHours(empty)).toBeNull();
   });
 
   it('formats filled values', () => {
@@ -79,8 +79,8 @@ describe('address and hours', () => {
 
 describe('missingFields', () => {
   it('lists every empty field in an incomplete config', () => {
-    expect(missingFields(real).length).toBeGreaterThan(0);
-    expect(missingFields(real).join(' ')).toContain('contact.phone');
+    expect(missingFields(empty).length).toBeGreaterThan(0);
+    expect(missingFields(empty).join(' ')).toContain('contact.phone');
   });
 
   it('is empty for a complete config', () => {

@@ -1,7 +1,7 @@
 import { clinic } from './clinic.config.js';
 import { bookingChannel, buildBookingMessage, telHref, whatsappHref } from './lib/clinic-utils.js';
 import { initStage } from './stage.js';
-import { MODALITY_COPY, SIZE_COPY } from './content/stones.js';
+import { MODALITY_COPY, SIZE_COPY, modalityHtml } from './content/stones.js';
 import { initMotion } from './motion.js';
 
 const stage = initStage();
@@ -75,8 +75,7 @@ modalityButtons.forEach(btn =>
     if (!copy) return;
     setPressed(modalityButtons, btn);
     if (modalityResult) {
-      modalityResult.innerHTML =
-        `<p>${copy.text}</p><ul class="tag-row">` + copy.tags.map(t => `<li>${t}</li>`).join('') + '</ul>';
+      modalityResult.innerHTML = modalityHtml(copy);
       swapIn(modalityResult);
     }
     stage.call('setModality', key);

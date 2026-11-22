@@ -170,7 +170,8 @@ test('drags on empty space reach the 3D canvas', async ({ page }, testInfo) => {
   expect(target).toBe('CANVAS');
 });
 
-test('chapter rail matches the chapter that is centred on screen', async ({ page }) => {
+test('chapter rail matches the chapter that is centred on screen', async ({ page }, testInfo) => {
+  test.skip(isPhone(testInfo), 'the rail is hidden on phones');
   await page.goto('/');
   for (const id of ['symptoms', 'stones', 'prostate']) {
     // Re-centre on every attempt: late font or image loads can move the panel

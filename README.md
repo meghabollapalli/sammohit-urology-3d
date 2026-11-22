@@ -2,7 +2,9 @@
 
 Website for **Dr. G SVS Sammohit** (M.S General Surgery, M.Ch Urology), urologist and andrologist. One page with a scroll-driven 3D model of the urinary tract that explains kidney stone and prostate treatment, plus everything a patient needs to book.
 
-Live: https://meghabollapalli.github.io/sammohit-urology-3d/ (deployed automatically from `main`).
+Live: https://meghabollapalli.github.io/sammohit-urology-3d/
+
+GitHub Pages serves the `site-preview` branch, which holds only built files. Pushing to `main` runs `.github/workflows/deploy.yml`, which builds the site and commits the result to `site-preview`. Do not edit that branch by hand and do not change the Pages source.
 
 ## Add the clinic’s details
 
@@ -40,7 +42,7 @@ npm run test:e2e     # Playwright end-to-end + axe accessibility tests (desktop 
 ## Content rules
 
 - Facts only: qualifications, procedures, how they work, contact details. No outcome percentages, superlatives, testimonials or before/after images.
-- Reviews: the owner asked for patient reviews from the clinic's Google listing to be shown. The section shows the rating and date from `googleReviews` in the config and a carousel of reviews from `src/content/reviews.js`, quoted word for word with names shortened, plus a link to the listing. No review count, no edited or invented reviews, and no review structured data. The clinic's own copy still follows the rule above.
+- Reviews: the owner asked for patient reviews from the clinic's Google listing to be shown. The section shows the rating from `googleReviews` in the config and a carousel of reviews from `src/content/reviews.js`, quoted word for word with names shortened, plus a link to the listing. No review count, no edited or invented reviews, and no review structured data. The clinic's own copy still follows the rule above.
 - Blog: one markdown file per article in `src/content/blog/` (front matter: `title`, `date`, `summary`, optional `draft: true`). The build writes `blog/index.html` and one page per post. Drafts carry a badge and `noindex` until the doctor has reviewed them. To rename the section, change `BLOG` in `src/lib/blog.js`.
 - Never put a guessed phone number, address or registration number in the config.
 - Name procedures in plain words first, abbreviation second.

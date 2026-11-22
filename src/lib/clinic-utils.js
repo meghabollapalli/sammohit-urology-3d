@@ -1,7 +1,9 @@
 /** Pure helpers over `clinic.config.js`. No DOM access, so they run in Node tests and the build. */
 
-const DAY_NAMES = { Mo: 'Mon', Tu: 'Tue', We: 'Wed', Th: 'Thu', Fr: 'Fri', Sa: 'Sat', Su: 'Sun' };
-const DAY_ORDER = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+/** Day codes used in `clinic.hours`, in week order, with their full names. */
+export const DAYS = { Mo: 'Monday', Tu: 'Tuesday', We: 'Wednesday', Th: 'Thursday', Fr: 'Friday', Sa: 'Saturday', Su: 'Sunday' };
+const DAY_ORDER = Object.keys(DAYS);
+const shortDay = code => DAYS[code].slice(0, 3);
 
 /** "+91 98765-43210" -> "919876543210"; null for empty/invalid input. */
 export function digitsOnly(value) {
@@ -84,9 +86,9 @@ function dayRange(days) {
   const idx = days.map(d => DAY_ORDER.indexOf(d)).sort((x, y) => x - y);
   const contiguous = idx.every((v, i) => i === 0 || v === idx[i - 1] + 1);
   if (idx.length > 2 && contiguous) {
-    return `${DAY_NAMES[DAY_ORDER[idx[0]]]}–${DAY_NAMES[DAY_ORDER[idx[idx.length - 1]]]}`;
+    return `${shortDay(DAY_ORDER[idx[0]])}–${shortDay(DAY_ORDER[idx[idx.length - 1]])}`;
   }
-  return idx.map(i => DAY_NAMES[DAY_ORDER[i]]).join(', ');
+  return idx.map(i => shortDay(DAY_ORDER[i])).join(', ');
 }
 
 function time12(t) {

@@ -12,15 +12,16 @@
  * height comes from a 100lvh probe, not from window.innerHeight, so the value
  * does not twitch when a phone browser's address bar slides in or out.
  */
+import { isWide } from './layout.js';
+
 const STOPS = ['.hero', '#symptoms', '#stones', '#prostate'];
-const PHONE = '(max-width: 899px)';
 let stopEls = null;
 let probe = null;
 let stage = null;
 
 /** { top, height } of the reading area, in CSS pixels from the top of the screen. */
 export function readingArea(doc = document, win = window) {
-  if (!win.matchMedia || !win.matchMedia(PHONE).matches) return { top: 0, height: win.innerHeight };
+  if (isWide(win)) return { top: 0, height: win.innerHeight };
   if (!probe) {
     probe = doc.createElement('div');
     probe.className = 'vh-probe';
@@ -59,6 +60,14 @@ export function journeyFromRanges(ranges, y) {
   return ranges.length - 1;
 }
 
+/** The journey value now. Measured at most once per frame, however many callers ask. */
+let frameValue = null;
 export function journeyValue() {
-  return journeyFromRanges(journeyRanges(), window.scrollY);
+  if (frameValue === null) {
+    frameValue = journeyFromRanges(journeyRanges(), window.scrollY);
+    requestAnimationFrame(() => {
+      frameValue = null;
+    });
+  }
+  return frameValue;
 }

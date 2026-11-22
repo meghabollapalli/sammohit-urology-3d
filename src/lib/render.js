@@ -6,11 +6,10 @@
  * Template syntax used in index.html:
  *   {{token}}                          replaced with an escaped value
  *   <!-- @faq -->, <!-- @jsonld -->,   replaced with generated blocks
- *   <!-- @visit-details -->
+ *   <!-- @visit-details --> and the other <!-- @name --> markers in BLOCKS below
  *   <tag data-requires="phone">…</tag>  removed when the clinic has no phone
  *   <tag data-requires-not="booking">…  removed when the clinic DOES have it
- * Capabilities: phone, whatsapp, booking, email, address, hours, registration, languages, reviews,
- * reviewtext, blog.
+ * Capabilities: phone, whatsapp, booking, registration, languages, reviews, reviewtext, blog.
  * Elements using data-requires must not contain a nested element with the same tag name.
  */
 import {
@@ -22,35 +21,29 @@ import {
   whatsappHref
 } from './clinic-utils.js';
 import { buildJsonLd } from './schema.js';
+import { CONCERNS, PREFERRED_TIMES } from './clinic-utils.js';
 import { escapeHtml } from './html.js';
 import { BLOG, renderPostCards } from './blog.js';
-import { LOGO_MARK } from './logo.js';
-
-export { escapeHtml };
+import { renderBrand, renderFooter } from './chrome.js';
+import { MODALITY_COPY, SIZE_COPY, modalityHtml } from '../content/stones.js';
 
 export function capabilities(clinic) {
   return {
     phone: Boolean(telHref(clinic)),
     whatsapp: Boolean(whatsappHref(clinic)),
     booking: Boolean(bookingChannel(clinic)),
-    email: Boolean(clinic.contact?.email),
-    address: Boolean(formatAddress(clinic)),
-    hours: Boolean(formatHours(clinic)),
     registration: Boolean(clinic.doctor?.registrationNumber),
     languages: Boolean(clinic.doctor?.languages?.length),
     reviews: Boolean(googleRating(clinic))
   };
 }
 
-/** { rating: '5.0', asOf: '22 November 2026', stars: 5 } or null. */
+/** { rating: '5.0', stars: 5 } or null. */
 export function googleRating(clinic) {
   const g = clinic.googleReviews;
-  if (!g || typeof g.rating !== 'number' || !/^\d{4}-\d{2}-\d{2}$/.test(g.asOf || '')) return null;
-  const [y, m, d] = g.asOf.split('-').map(Number);
-  const month = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][m - 1];
+  if (!g || typeof g.rating !== 'number') return null;
   return {
     rating: g.rating.toFixed(1),
-    asOf: `${d} ${month} ${y}`,
     stars: Math.max(0, Math.min(5, Math.round(g.rating)))
   };
 }
@@ -143,7 +136,11 @@ export function renderIndexHtml(html, clinic, faqs, { reviews = [], posts = [] }
     doctorName: clinic.doctor.name,
     doctorTitle: clinic.doctor.title,
     degrees: clinic.doctor.degrees.join(', '),
-    degreesShort: 'M.S, M.Ch (Urology)',
+    // Postgraduate degrees only, e.g. "M.S, M.Ch (Urology)": the field in brackets is kept on the last one.
+    degreesShort: clinic.doctor.degrees
+      .slice(1)
+      .map((d, i, all) => (i < all.length - 1 ? d.replace(/\s*\(.*\)$/, '') : d))
+      .join(', '),
     procedures: procedures ? `${procedures.toLocaleString('en-IN')}+` : '',
     proceduresNumber: procedures ? procedures.toLocaleString('en-IN') : '',
     tel: telHref(clinic) || '',
@@ -154,26 +151,34 @@ export function renderIndexHtml(html, clinic, faqs, { reviews = [], posts = [] }
     registration: clinic.doctor.registrationNumber || '',
     languages: (clinic.doctor.languages || []).join(', '),
     reviewsRating: rating ? rating.rating : '',
-    reviewsAsOf: rating ? rating.asOf : '',
     blogTitle: BLOG.title,
-    blogHref: `./${BLOG.dir}/index.html`,
-    year: String(new Date().getFullYear())
+    blogHref: `./${BLOG.dir}/index.html`
   };
 
   let out = stripByCapability(html, caps);
-  out = out.replace('<!-- @faq -->', renderFaq(faqs));
-  out = out.replace(
-    '<!-- @stars -->',
-rating ? starRow(rating.stars) : ''
-  );
-  out = out.replace('<!-- @logo -->', LOGO_MARK);
-  out = out.replace('<!-- @reviews -->', renderReviews(reviews));
-  out = out.replace('<!-- @blog -->', renderPostCards(posts.slice(0, 3), `./${BLOG.dir}/`));
-  out = out.replace('<!-- @visit-details -->', renderVisitDetails(clinic));
-  out = out.replace(
-    '<!-- @jsonld -->',
-    `<script type="application/ld+json">${JSON.stringify(buildJsonLd(clinic, faqs)).replace(/</g, '\\u003c')}</script>`
-  );
+  const options = map =>
+    Object.entries(map)
+      .map(([value, label]) => `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`)
+      .join('');
+  const BLOCKS = {
+    faq: renderFaq(faqs),
+    stars: rating ? starRow(rating.stars) : '',
+    brand: renderBrand(),
+    footer: renderFooter(clinic),
+    reviews: renderReviews(reviews),
+    blog: renderPostCards(posts.slice(0, 3), `./${BLOG.dir}/`),
+    'visit-details': renderVisitDetails(clinic),
+    'concern-options': options(CONCERNS),
+    'time-options': options(PREFERRED_TIMES),
+    // The pickers' starting text: the same copy the buttons swap in later.
+    'size-result': SIZE_COPY[8],
+    'modality-result': modalityHtml(MODALITY_COPY.ursl),
+    jsonld: `<script type="application/ld+json">${JSON.stringify(buildJsonLd(clinic, faqs)).replace(/</g, '\\u003c')}</script>`
+  };
+  out = out.replace(/<!-- @([a-z-]+) -->/g, (m, name) => {
+    if (!(name in BLOCKS)) throw new Error(`Unknown block <!-- @${name} --> in index.html`);
+    return BLOCKS[name];
+  });
   out = out.replace(/\{\{(\w+)\}\}/g, (m, key) => {
     if (!(key in tokens)) throw new Error(`Unknown template token {{${key}}} in index.html`);
     return escapeHtml(tokens[key]);

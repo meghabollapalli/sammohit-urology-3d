@@ -12,4 +12,3 @@ export const clinic = {
     { days: ['Mo', 'Tu', 'We', 'Th', 'Fr'], opens: '17:30', closes: '20:30' }
   ]
 };
-export default clinic;

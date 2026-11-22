@@ -15,7 +15,7 @@
  * To rename the section (for example to "Articles"), change BLOG below.
  */
 import { escapeHtml } from './html.js';
-import { LOGO_MARK } from './logo.js';
+import { renderBrand, renderFooter } from './chrome.js';
 
 export const BLOG = { dir: 'blog', title: 'Blog', itemName: 'article' };
 
@@ -115,12 +115,7 @@ function page({ clinic, cssHref, title, description, noindex, body }) {
   <header class="site-header is-solid">
     <div class="header-inner">
       <a href="${home}" class="brand">
-        ${LOGO_MARK}
-        <span class="brand-text">
-          <span class="brand-name">Sammohit</span>
-          <span class="brand-sub">Urology &amp; Andrology</span>
-          <span class="sr-only">, clinic home page</span>
-        </span>
+        ${renderBrand(', clinic home page')}
       </a>
       <div class="header-actions">
         <a class="link-quiet blog-back" href="${home}">Clinic website</a>
@@ -133,20 +128,7 @@ function page({ clinic, cssHref, title, description, noindex, body }) {
 ${body}
     </div>
   </main>
-  <footer class="site-footer">
-    <div class="wrap">
-      <div class="footer-grid">
-        <div>
-          <p class="footer-name">${escapeHtml(clinic.name)}</p>
-          <p>${escapeHtml(clinic.doctor.name)}, ${escapeHtml(clinic.doctor.degrees.join(', '))}</p>
-        </div>
-        <p class="disclaimer">
-          This website gives general information and is not a substitute for a consultation. In an emergency, go to the nearest hospital emergency department or call 108 or 112.
-        </p>
-        <p class="copyright">© ${new Date().getFullYear()} ${escapeHtml(clinic.name)}</p>
-      </div>
-    </div>
-  </footer>
+  ${renderFooter(clinic)}
 </body>
 </html>
 `;

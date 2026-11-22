@@ -8,3 +8,4 @@
 - Keep first-load JS/CSS within the budget in `scripts/check-budget.js`; three.js must stay in the lazy `scene3d` chunk.
 - Before opening a PR run `npm test`, `npm run build` and `npm run test:e2e`.
 - If the 3D camera framing changes, regenerate `public/img/stage-*.webp` and `og.jpg` from the live scene.
+- The live site is the `site-preview` branch (built files only). `.github/workflows/deploy.yml` writes it from `main`; until `main` carries the site, publish a fresh `npm run build` there by hand. Do not change the Pages source.

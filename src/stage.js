@@ -8,6 +8,8 @@
  *   when the visitor asks.
  * - Rendering pauses while the journey is off screen or the tab is hidden.
  */
+import { isWide } from './lib/layout.js';
+
 export function supportsWebGL() {
   try {
     const canvas = document.createElement('canvas');
@@ -33,11 +35,7 @@ export function initStage() {
     call(method, ...args) {
       pending[method] = args;
       if (controller && typeof controller[method] === 'function') controller[method](...args);
-    },
-    get loaded() {
-      return Boolean(controller);
-    },
-    load
+    }
   };
 
   if (!stageEl || !container) return api;
@@ -61,18 +59,16 @@ export function initStage() {
     if (loading || controller) return;
     loading = true;
     if (loadBtn) loadBtn.hidden = true;
-    stageEl.classList.add('is-loading');
     try {
       const { initUrology3DScene } = await import('./scene3d.js');
       const lowPower =
-        window.innerWidth < 900 ||
+        !isWide() ||
         (navigator.deviceMemory && navigator.deviceMemory <= 4) ||
         (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
       controller = initUrology3DScene({
         container,
         lowPower: Boolean(lowPower),
         onFirstFrame: () => {
-          stageEl.classList.remove('is-loading');
           stageEl.classList.add('is-live');
           document.documentElement.dataset.scene = 'live';
         }
@@ -81,7 +77,6 @@ export function initStage() {
       syncRunning();
     } catch (err) {
       console.warn('3D scene unavailable, keeping the still image.', err);
-      stageEl.classList.remove('is-loading');
     }
   }
 

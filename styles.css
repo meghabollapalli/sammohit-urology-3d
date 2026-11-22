@@ -442,24 +442,6 @@ main:focus {
   text-decoration: none;
 }
 
-.brand-mark {
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  border: 1px solid var(--ink-line-2);
-  font-family: var(--serif);
-  font-size: 1.35rem;
-  font-style: italic;
-  color: var(--accent);
-  transition: transform 0.6s var(--ease);
-}
-
-.brand:hover .brand-mark {
-  transform: rotate(-12deg);
-}
-
 .brand-text {
   display: flex;
   flex-direction: column;
@@ -564,22 +546,21 @@ main:focus {
 .menu-btn span,
 .menu-btn span::before {
   position: absolute;
-  left: 50%;
   width: 18px;
   height: 1.5px;
-  margin-left: -9px;
   background: currentColor;
   transition: transform 0.4s var(--ease);
 }
 
 .menu-btn span {
   top: calc(50% - 3px);
+  left: 50%;
+  margin-left: -9px;
 }
 
 .menu-btn span::before {
   content: '';
   left: 0;
-  margin-left: 0;
   top: 6px;
 }
 
@@ -659,7 +640,6 @@ main:focus {
 .stage {
   position: fixed;
   inset: 0;
-  z-index: 0;
   overflow: hidden;
   background: radial-gradient(120% 80% at 70% 30%, #12283a 0%, #070d13 55%, #04070b 100%);
 }
@@ -710,12 +690,9 @@ main:focus {
   transition: visibility 0s 0.6s;
 }
 
-/* Legibility scrims: from the bottom on phones, from the left on desktop. */
+/* Legibility scrims: from the left on desktop; the phone one is with the phone layout. */
 .stage-scrim {
   pointer-events: none;
-  background:
-    linear-gradient(180deg, rgba(6, 9, 13, 0) 30%, rgba(6, 9, 13, 0.55) 55%, rgba(6, 9, 13, 0.92) 78%),
-    linear-gradient(180deg, rgba(6, 9, 13, 0.55) 0%, rgba(6, 9, 13, 0) 18%);
 }
 
 @media (min-width: 900px) {
@@ -758,7 +735,7 @@ main {
   min-height: 100svh;
   display: flex;
   align-items: flex-end;
-  padding: calc(var(--header-h) + 34svh) var(--gutter) 48px;
+  padding: 0 var(--gutter);
   max-width: 1560px;
   margin: 0 auto;
 }
@@ -816,10 +793,6 @@ main {
     font-size: clamp(3rem, 13.4vw, 5.6rem);
   }
 
-  .hero,
-  .chapter {
-    padding-bottom: 104px;
-  }
 }
 
 .hero-foot {
@@ -964,11 +937,7 @@ main {
 
 /* Chapters */
 .chapter {
-  min-height: 100vh;
-  min-height: 100svh;
   display: flex;
-  align-items: flex-end;
-  padding: calc(var(--header-h) + 42svh) var(--gutter) 40px;
   max-width: 1560px;
   margin: 0 auto;
 }
@@ -984,19 +953,6 @@ main {
 .chapter-panel {
   width: 100%;
   max-width: 560px;
-}
-
-@media (max-width: 899px) {
-  .chapter-panel {
-    padding: 24px 20px;
-    margin: 0 calc(var(--gutter) * -1 + 4px);
-    width: auto;
-    border: 1px solid var(--ink-line);
-    border-radius: var(--radius);
-    background: rgba(8, 12, 17, 0.82);
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
-  }
 }
 
 .chapter-label {
@@ -2592,8 +2548,7 @@ html:not(.js) .seg[aria-pressed='true'] {
    page content that scrolls up underneath it. Nothing is positioned by script,
    nothing snaps, and sizes use lvh/px so the browser's address bar sliding in
    and out never moves anything. */
-.panel-card,
-.panel-card > .card {
+.panel-card {
   display: contents;
 }
 .stage {
@@ -2657,22 +2612,14 @@ html:not(.js) .seg[aria-pressed='true'] {
   .journey .chapter .chapter-panel {
     max-width: 620px;
     width: auto;
-    margin: 0;
-    padding: 0;
-    border: 0;
-    border-radius: 0;
-    background: none;
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
   }
-  .panel-card,
-  .panel-card > .card {
+  .panel-card {
     display: block;
   }
   .panel-card + .panel-card {
     margin-top: 40px;
   }
-  .panel-card .card > :first-child {
+  .panel-card > :first-child {
     margin-top: 0;
     padding-top: 0;
     border-top: 0;

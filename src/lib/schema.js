@@ -1,4 +1,4 @@
-import { formatPhone, phoneDigits } from './clinic-utils.js';
+import { DAYS, formatPhone, phoneDigits } from './clinic-utils.js';
 
 /**
  * schema.org JSON-LD for the clinic, the doctor and the FAQ.
@@ -61,10 +61,9 @@ export function buildJsonLd(clinic, faqs = []) {
     medicalClinic.geo = { '@type': 'GeoCoordinates', latitude: clinic.geo.lat, longitude: clinic.geo.lng };
   }
   if (Array.isArray(clinic.hours) && clinic.hours.length) {
-    const dayMap = { Mo: 'Monday', Tu: 'Tuesday', We: 'Wednesday', Th: 'Thursday', Fr: 'Friday', Sa: 'Saturday', Su: 'Sunday' };
     medicalClinic.openingHoursSpecification = clinic.hours.map(h => ({
       '@type': 'OpeningHoursSpecification',
-      dayOfWeek: h.days.map(d => dayMap[d]),
+      dayOfWeek: h.days.map(d => DAYS[d]),
       opens: h.opens,
       closes: h.closes
     }));

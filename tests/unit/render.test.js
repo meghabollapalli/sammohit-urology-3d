@@ -1,10 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { clinic as real } from '../fixtures/clinic.empty.js';
+import { clinic as empty } from '../fixtures/clinic.empty.js';
 import { faqs } from '../../src/content/faq.js';
 import { clinic as shipped } from '../../src/clinic.config.js';
 import { clinic as full } from '../fixtures/clinic.fixture.js';
-import { escapeHtml, renderIndexHtml } from '../../src/lib/render.js';
+import { escapeHtml } from '../../src/lib/html.js';
+import { renderIndexHtml } from '../../src/lib/render.js';
 import { buildJsonLd } from '../../src/lib/schema.js';
 import { reviews } from '../../src/content/reviews.js';
 import { parsePost, renderBlogIndex, renderBlogPost } from '../../src/lib/blog.js';
@@ -18,7 +19,7 @@ function jsonLd(html) {
 }
 
 describe('renderIndexHtml with an incomplete config', () => {
-  const html = renderIndexHtml(template, real, faqs);
+  const html = renderIndexHtml(template, empty, faqs);
 
   it('leaves no template tokens or markers behind', () => {
     expect(html).not.toMatch(/\{\{\w+\}\}/);
@@ -34,7 +35,7 @@ describe('renderIndexHtml with an incomplete config', () => {
   });
 
   it('always keeps directions', () => {
-    expect(html).toContain(real.mapsUrl.replace(/&/g, '&amp;'));
+    expect(html).toContain(empty.mapsUrl.replace(/&/g, '&amp;'));
   });
 
   it('omits unknown facts from structured data', () => {
@@ -98,7 +99,7 @@ describe('safety', () => {
 describe('Google reviews section', () => {
   const html = renderIndexHtml(template, shipped, faqs, { reviews });
 
-  it('shows the rating and date from the config, without a review count', () => {
+  it('shows the rating from the config, without a review count', () => {
     expect(html).toContain('Rated 5.0 <em>on Google.</em>');
     expect(html).toContain('Read all reviews on Google');
     expect(html).toContain('href="#reviews"');
@@ -115,7 +116,7 @@ describe('Google reviews section', () => {
 
   it('drops the carousel when there is no review text, and the section when there is no rating', () => {
     expect(renderIndexHtml(template, shipped, faqs)).not.toContain('review-track');
-    const none = renderIndexHtml(template, real, faqs, { reviews });
+    const none = renderIndexHtml(template, empty, faqs, { reviews });
     expect(none).not.toContain('reviews-title');
     expect(none).not.toContain('review-card');
     expect(none).not.toContain('href="#reviews"');

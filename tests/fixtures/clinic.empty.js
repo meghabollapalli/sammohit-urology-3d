@@ -11,4 +11,3 @@ export const clinic = {
   hours: null,
   googleReviews: null
 };
-export default clinic;

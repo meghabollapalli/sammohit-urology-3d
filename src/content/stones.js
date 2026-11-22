@@ -20,3 +20,6 @@ export const MODALITY_COPY = {
     tags: ['One small keyhole', 'Stones over about 2 cm', 'Large stones in one sitting']
   }
 };
+
+/** Markup for one procedure's description and tags. */
+export const modalityHtml = copy => `<p>${copy.text}</p><ul class="tag-row">${copy.tags.map(t => `<li>${t}</li>`).join('')}</ul>`;

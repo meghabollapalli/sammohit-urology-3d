@@ -46,11 +46,7 @@
   <header class="site-header" id="top">
     <div class="header-inner">
       <a href="#main" class="brand" aria-label="{{clinicName}}, back to top">
-        <!-- @logo -->
-        <span class="brand-text">
-          <span class="brand-name">Sammohit</span>
-          <span class="brand-sub">Urology &amp; Andrology</span>
-        </span>
+        <!-- @brand -->
       </a>
 
       <nav class="primary-nav" id="primary-nav" aria-label="Main">
@@ -132,14 +128,14 @@
       <!-- 01 Symptoms (3D: ureter) -->
       <section class="chapter" id="symptoms" aria-labelledby="symptoms-title">
         <div class="chapter-panel">
-          <div class="panel-card"><div class="card">
+          <div class="panel-card">
           <p class="chapter-label" data-reveal><span class="chapter-num">01</span> Symptoms</p>
           <h2 id="symptoms-title" class="display-md" data-split>When a stone <em>starts to move.</em></h2>
           <p class="chapter-body" data-reveal>
             A stone leaving the kidney can lodge in the ureter, the narrow tube that carries urine to the bladder. It causes pain and can block the kidney, so it is worth getting checked early.
           </p>
-          </div></div>
-          <div class="panel-card"><div class="card">
+          </div>
+          <div class="panel-card">
           <div class="triage" data-reveal>
             <div class="triage-col">
               <h3>Book a visit if you have</h3>
@@ -160,14 +156,14 @@
               </ul>
             </div>
           </div>
-          </div></div>
+          </div>
         </div>
       </section>
 
       <!-- 02 Treatment (3D: laser) -->
       <section class="chapter" id="stones" aria-labelledby="stones-title">
         <div class="chapter-panel">
-          <div class="panel-card"><div class="card">
+          <div class="panel-card">
           <p class="chapter-label" data-reveal><span class="chapter-num">02</span> Kidney stone treatment</p>
           <h2 id="stones-title" class="display-md" data-split>Treated from <em>the inside.</em></h2>
 
@@ -181,12 +177,12 @@
               <button type="button" class="seg" data-mm="22" aria-pressed="false">Over 2 cm</button>
             </div>
             <p class="picker-result" id="size-result" aria-live="polite">
-              <strong>Medium stone, about 8 mm.</strong> Less likely to pass on its own and can get stuck in the ureter. Usually treated with URSL or RIRS laser, without a cut.
+              <!-- @size-result -->
             </p>
           </fieldset>
-          </div></div>
+          </div>
 
-          <div class="panel-card"><div class="card">
+          <div class="panel-card">
           <fieldset class="picker" data-reveal>
             <legend>Compare procedures</legend>
             <div class="segmented" style="--count: 3">
@@ -196,19 +192,18 @@
               <button type="button" class="seg" data-modality="pcnl" aria-pressed="false">PCNL</button>
             </div>
             <div class="picker-result" id="modality-result" aria-live="polite">
-              <p><strong>URSL, ureteroscopic laser lithotripsy.</strong> A thin telescope passes through the urinary passage up into the ureter, and a laser breaks the stone into tiny pieces that wash out.</p>
-              <ul class="tag-row"><li>No skin cut</li><li>Stones in the ureter</li><li>Under anaesthesia</li></ul>
+              <!-- @modality-result -->
             </div>
           </fieldset>
           <p class="fineprint" data-reveal>The right treatment depends on the stone’s size and position and on your health. This is a guide, not medical advice.</p>
-          </div></div>
+          </div>
         </div>
       </section>
 
       <!-- 03 Prostate (3D: bladder and prostate) -->
       <section class="chapter" id="prostate" aria-labelledby="prostate-title">
         <div class="chapter-panel">
-          <div class="panel-card"><div class="card">
+          <div class="panel-card">
           <p class="chapter-label" data-reveal><span class="chapter-num">03</span> Bladder &amp; prostate</p>
           <h2 id="prostate-title" class="display-md" data-split>Room to <em>flow again.</em></h2>
           <p class="chapter-body" data-reveal>
@@ -221,7 +216,7 @@
             <a class="btn btn-accent" href="#book"><span>Book a consultation</span><i class="arrow" aria-hidden="true"></i></a>
             <a class="btn btn-line" href="#treatments"><span>All treatments</span></a>
           </div>
-          </div></div>
+          </div>
         </div>
       </section>
       <div id="journey-end-anchor" aria-hidden="true"></div>
@@ -506,22 +501,13 @@
                   <div class="field">
                     <label for="book-concern">What is it about?</label>
                     <select id="book-concern" name="concern">
-                      <option value="stone">Kidney or ureter stone</option>
-                      <option value="prostate">Prostate / urine flow problems</option>
-                      <option value="ed">Erectile dysfunction (confidential)</option>
-                      <option value="pe">Premature ejaculation (confidential)</option>
-                      <option value="andrology">Andrology (confidential)</option>
-                      <option value="infertility">Male infertility</option>
-                      <option value="general">General urology or scan review</option>
+                      <!-- @concern-options -->
                     </select>
                   </div>
                   <div class="field">
                     <label for="book-time">Preferred time</label>
                     <select id="book-time" name="time">
-                      <option value="any">Any time</option>
-                      <option value="morning">Morning</option>
-                      <option value="afternoon">Afternoon</option>
-                      <option value="evening">Evening</option>
+                      <!-- @time-options -->
                     </select>
                   </div>
                 </div>
@@ -543,20 +529,7 @@
     </div>
   </main>
 
-  <footer class="site-footer">
-    <div class="wrap">
-      <div class="footer-grid">
-        <div>
-          <p class="footer-name">{{clinicName}}</p>
-          <p>{{doctorName}}, {{degrees}}</p>
-        </div>
-        <p class="disclaimer">
-          This website gives general information and is not a substitute for a consultation. In an emergency, go to the nearest hospital emergency department or call 108 or 112.
-        </p>
-        <p class="copyright">© {{year}} {{clinicName}}</p>
-      </div>
-    </div>
-  </footer>
+  <!-- @footer -->
 
   <!-- Phone action bar -->
   <nav class="action-bar" aria-label="Quick contact">

@@ -13,7 +13,6 @@
  */
 export const clinic = {
   name: 'Sammohit’s Urology and Andrology Center',
-  shortName: 'Sammohit Urology',
 
   doctor: {
     name: 'Dr. G SVS Sammohit',
@@ -59,14 +58,12 @@ export const clinic = {
   ],
 
   /**
-   * Rating shown on the clinic's Google listing, with the date it was read.
-   * Update both together, or set to `null` to hide the reviews section.
+   * Rating shown on the clinic's Google listing. Set to `null` to hide the
+   * reviews section.
    * The review text in the carousel lives in `src/content/reviews.js`.
    */
-  googleReviews: { rating: 5.0, asOf: '2026-11-22' },
+  googleReviews: { rating: 5.0 },
 
   /** Public URL the site is served from (used for canonical + sitemap). */
   siteUrl: 'https://meghabollapalli.github.io/sammohit-urology-3d/'
 };
-
-export default clinic;
