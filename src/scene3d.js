@@ -1197,7 +1197,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     const stoneU = stoneUFor(renalMix < 0.5 ? 0 : 1);
     const swapScale = Math.min(1, Math.abs(renalMix * 2 - 1) * 1.6);
     const stoneCenter = tractAt(stoneU);
-    const baseStoneRadius = 0.108 + (mix.mm - 4) * 0.0095;
+    const baseStoneRadius = 0.138 + (mix.mm - 4) * 0.0095;
     const intactScale = Math.max(0, 1 - erosion * 0.95) * swapScale;
     const activeStoneRadius = baseStoneRadius * intactScale;
 
