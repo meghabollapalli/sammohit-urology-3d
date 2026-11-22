@@ -214,3 +214,19 @@ test('blog index and article pages open and link back', async ({ page }) => {
   await expect(page).toHaveURL(/index\.html#book$/);
   expect(errors).toEqual([]);
 });
+
+test('journey text is never covered by the 3D stage', async ({ page }) => {
+  test.setTimeout(120_000); // software WebGL makes scrolling slow in CI
+  await page.goto('./');
+  for (const sel of ['#symptoms-title', '#symptoms .chapter-body', '#stones-title', '#size-result', '#modality-result', '#prostate-title']) {
+    const el = page.locator(sel);
+    await el.evaluate(node => node.scrollIntoView({ block: 'center', behavior: 'instant' }));
+    const covered = await el.evaluate(node => {
+      const r = node.getBoundingClientRect();
+      const stack = document.elementsFromPoint(r.left + Math.min(r.width / 2, 60), r.top + r.height / 2);
+      const own = stack.findIndex(s => s === node || node.contains(s));
+      return own < 0 || stack.slice(0, own).some(s => s.closest('#stage'));
+    });
+    expect(covered, `${sel} is covered`).toBe(false);
+  }
+});

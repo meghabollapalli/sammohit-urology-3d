@@ -2517,10 +2517,17 @@ html:not(.js) .seg[aria-pressed='true'] {
   font-size: clamp(1.25rem, 2.6vw, 2.1rem);
   line-height: 1.2;
 }
-@media (max-width: 599px) {
+/* Phones and tablets: show the whole photograph, uncropped, with the caption
+   underneath it instead of over it. */
+@media (max-width: 899px) {
   .theatre img {
-    aspect-ratio: 4 / 5;
-    object-position: 6% 60%;
+    max-height: none;
+    object-fit: contain;
+  }
+  .theatre figcaption {
+    position: static;
+    padding: 16px var(--gutter) 28px;
+    background: none;
   }
 }
 
