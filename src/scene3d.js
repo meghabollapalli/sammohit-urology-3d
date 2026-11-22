@@ -998,12 +998,16 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
   dustGeo.setAttribute('color', new THREE.BufferAttribute(dustColors, 3));
 
+  // Points are sized in scene units, so on a short panel (phones) they would
+  // shrink to specks. Scale them up there so they stay about as large on
+  // screen as they are on a desktop window.
+  const dustSize = () => 0.06 * (window.innerWidth < 900 ? Math.min(4, Math.max(1, 1400 / viewH)) : 1);
   const dustMat = new THREE.PointsMaterial({
-    size: 0.06,
+    size: dustSize(),
     map: createSoftParticleSprite(),
     vertexColors: true,
     transparent: true,
-    opacity: 0.9,
+    opacity: lowPower ? 1 : 0.9,
     depthWrite: false
   });
   const dustPoints = new THREE.Points(dustGeo, dustMat);
@@ -1098,6 +1102,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    dustMat.size = dustSize();
     renderer.setPixelRatio(dpr);
     renderer.setSize(w, h);
     composer.setSize(w, h);
