@@ -173,11 +173,15 @@ test('drags on empty space reach the 3D canvas', async ({ page }, testInfo) => {
 test('chapter rail matches the chapter that is centred on screen', async ({ page }) => {
   await page.goto('/');
   for (const id of ['symptoms', 'stones', 'prostate']) {
-    await page.evaluate(sel => {
-      const r = document.querySelector(sel).getBoundingClientRect();
-      window.scrollTo(0, r.top + window.scrollY + r.height / 2 - window.innerHeight / 2);
-    }, `#${id} .chapter-panel`);
-    await expect(page.locator(`.chapters a[data-chapter="${id}"]`)).toHaveClass(/is-active/);
-    await expect(page.locator('.chapters a.is-active')).toHaveCount(1);
+    // Re-centre on every attempt: late font or image loads can move the panel
+    // after the first scroll, and a smooth scroll can be cut short.
+    await expect(async () => {
+      await page.evaluate(sel => {
+        const r = document.querySelector(sel).getBoundingClientRect();
+        window.scrollTo({ top: r.top + window.scrollY + r.height / 2 - window.innerHeight / 2, behavior: 'instant' });
+      }, `#${id} .chapter-panel`);
+      await expect(page.locator(`.chapters a[data-chapter="${id}"]`)).toHaveClass(/is-active/, { timeout: 1500 });
+      await expect(page.locator('.chapters a.is-active')).toHaveCount(1, { timeout: 1500 });
+    }).toPass({ timeout: 20_000 });
   }
 });

@@ -106,5 +106,8 @@ export function initMotion() {
   };
   window.addEventListener('scroll', requestTick, { passive: true });
   window.addEventListener('resize', requestTick, { passive: true });
+  window.addEventListener('load', requestTick, { once: true });
+  // Late layout changes (fonts, images) move the chapters without a scroll event.
+  if ('ResizeObserver' in window) new ResizeObserver(requestTick).observe(document.body);
   onScroll();
 }
