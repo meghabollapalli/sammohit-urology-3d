@@ -77,6 +77,14 @@ export function initMotion() {
   const journeyEnd = document.getElementById('journey-end-anchor');
   const CHAPTERS = [null, 'symptoms', 'stones', 'prostate'];
   let ticking = false;
+  let lastJourney = 0;
+  window.addEventListener('pagehide', () => {
+    try {
+      sessionStorage.setItem('journey', lastJourney.toFixed(3));
+    } catch {
+      /* private mode: the still simply shows as usual */
+    }
+  });
   const onScroll = () => {
     ticking = false;
     const max = document.documentElement.scrollHeight - window.innerHeight;
@@ -85,8 +93,12 @@ export function initMotion() {
       header.classList.toggle('is-scrolled', y > 24);
       header.style.setProperty('--progress', max > 0 ? (y / max).toFixed(4) : '0');
     }
+    // The still image shows the hero. Away from the hero, the stage stays dark
+    // until the live scene takes over (see the inline script in index.html).
+    const j = journeyValue();
+    root.classList.toggle('no-still', j > 0.12);
+    lastJourney = j;
     if (chapterLinks.length) {
-      const j = journeyValue();
       const inJourney = !journeyEnd || journeyEnd.getBoundingClientRect().top > window.innerHeight * 0.5;
       const current = CHAPTERS[Math.round(j)];
       root.classList.toggle('in-chapters', j >= 0.5 && inJourney);

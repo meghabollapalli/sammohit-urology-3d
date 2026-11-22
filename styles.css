@@ -700,6 +700,11 @@ main:focus {
   opacity: 1;
 }
 
+/* Reopened part-way down the page: no hero still while the 3D loads. */
+.no-still .stage-poster {
+  visibility: hidden;
+}
+
 .stage.is-live .stage-poster {
   visibility: hidden;
   transition: visibility 0s 0.6s;
