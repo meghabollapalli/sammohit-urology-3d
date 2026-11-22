@@ -1872,7 +1872,8 @@ html:not(.js) .seg[aria-pressed='true'] {
 .field textarea {
   width: 100%;
   min-height: 54px;
-  padding: 14px 16px;
+  padding: 14px 18px;
+  line-height: 1.4;
   border: 1px solid var(--ink-line-2);
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.04);
@@ -1885,7 +1886,25 @@ html:not(.js) .seg[aria-pressed='true'] {
 }
 
 .field textarea {
+  display: block;
   resize: vertical;
+}
+
+/* One chevron for every browser, inset to match the text padding. */
+.field select {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 48px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9' fill='none' stroke='%23b3bdc5' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1.5 1.5 7 7l5.5-5.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.field select option {
+  background: var(--ink-2);
+  color: var(--fog);
 }
 
 .field input::placeholder,
@@ -2520,6 +2539,13 @@ html:not(.js) .seg[aria-pressed='true'] {
 .stage {
   pointer-events: auto;
 }
+@media (min-width: 900px) {
+  /* The stage is a positioned box inside <main>. It must sit below the
+     journey's ordinary (non-positioned) text, or it paints over it. */
+  .stage {
+    z-index: -1;
+  }
+}
 @media (max-width: 899px) {
   :root {
     --stage-h: 44vh;
@@ -2644,4 +2670,39 @@ html:not(.js) .seg[aria-pressed='true'] {
   height: 100lvh;
   visibility: hidden;
   pointer-events: none;
+}
+
+/* Button rows: equal partners. A pair of buttons shares the row evenly; on
+   phones every row of buttons lines up on the same two edges. */
+.cta-row .btn {
+  justify-content: center;
+}
+.cta-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 520px;
+}
+.cta-pair > :only-child {
+  grid-column: 1 / -1;
+}
+@media (max-width: 599px) {
+  .cta-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .cta-row > .btn:first-child:nth-last-child(odd),
+  .cta-row > .btn:only-child {
+    grid-column: 1 / -1;
+  }
+  .cta-row .btn {
+    padding-left: 14px;
+    padding-right: 14px;
+    white-space: nowrap;
+  }
+}
+@media (max-width: 379px) {
+  .cta-row,
+  .cta-pair {
+    grid-template-columns: 1fr;
+  }
 }
