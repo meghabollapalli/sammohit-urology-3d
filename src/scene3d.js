@@ -691,13 +691,15 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     transmission: 0.72,
     thickness: 1.05,
     ior: 1.38,
-    roughness: 0.14,
+    roughness: 0.3,
     bumpMap: tissueBumpTex,
     bumpScale: 0.012,
-    clearcoat: 1.0,
-    clearcoatRoughness: 0.07,
+    clearcoat: 0.35,
+    clearcoatRoughness: 0.4,
     transparent: true,
-    opacity: 0.86
+    opacity: 0.86,
+    // The urine inside is drawn afterwards and must not be depth-culled by the wall.
+    depthWrite: false
   });
   const bladderMesh = new THREE.Mesh(bladderGeo, bladderMat);
   bladderGroup.add(bladderMesh);
@@ -712,18 +714,23 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   ];
   const fluidGeo = new THREE.LatheGeometry(fluidPts, 44);
   fluidGeo.scale(1.0, 1.0, 0.75);
-  const fluidMat = new THREE.MeshPhysicalMaterial({
-    color: 0x38bdf8,
-    emissive: 0x07364d,
-    emissiveIntensity: 0.35,
-    transmission: 0.82,
-    thickness: 1.2,
-    ior: 1.333,
-    roughness: 0.06,
+  // Urine: a plain see-through blue body. It is not a transmissive material:
+  // two transmissive surfaces cannot see each other, which showed the bladder
+  // wall as a pink sheet inside the fluid.
+  const fluidMat = new THREE.MeshStandardMaterial({
+    color: 0x2f9fd6,
+    emissive: 0x0a4a6b,
+    emissiveIntensity: 0.5,
+    roughness: 0.45,
+    metalness: 0,
     transparent: true,
-    opacity: 0.58
+    opacity: 0.6,
+    side: THREE.DoubleSide,
+    depthWrite: false
   });
   const bladderFluidMesh = new THREE.Mesh(fluidGeo, fluidMat);
+  // Always after the bladder wall and the prostate, whichever way they sort.
+  bladderFluidMesh.renderOrder = 1;
   bladderGroup.add(bladderFluidMesh);
 
   // 3D Sculpted Prostate Gland Collar around Proximal Urethra (HoLEP & TURP Zone)
@@ -747,10 +754,11 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     attenuationDistance: 0.95,
     transmission: 0.56,
     thickness: 0.85,
-    roughness: 0.22,
+    roughness: 0.4,
     bumpMap: tissueBumpTex,
     bumpScale: 0.015,
-    clearcoat: 0.9,
+    clearcoat: 0.3,
+    clearcoatRoughness: 0.45,
     transparent: true,
     opacity: 0.84
   });
@@ -1376,7 +1384,6 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     }
 
     bladderFluidMesh.position.y = Math.sin(elapsed * 1.9) * 0.025;
-    bladderFluidMesh.rotation.y = elapsed * 0.35;
     prostateMat.emissive.setHex(prostateFocus > 0.2 ? 0x164e63 : 0x24080e);
     prostateMat.emissiveIntensity = 0.35 + prostateFocus * (0.45 + 0.2 * Math.sin(elapsed * 3.0));
 
