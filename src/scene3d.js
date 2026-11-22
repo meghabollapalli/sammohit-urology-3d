@@ -255,85 +255,203 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   }
   kidneyGeo.computeVertexNormals();
 
+  // The outer shell is plain alpha-blended tissue drawn after everything inside
+  // it, so the collecting system shows faintly through and is revealed
+  // smoothly when the shell fades for treatment.
   const kidneyCortexMat = new THREE.MeshPhysicalMaterial({
     color: 0xc84d50,
-    attenuationColor: new THREE.Color(0x63101a),
-    attenuationDistance: 1.45,
-    transmission: 0.64,
-    thickness: 1.95,
-    ior: 1.38,
-    roughness: 0.18,
+    roughness: 0.34,
     bumpMap: tissueBumpTex,
     bumpScale: 0.018,
-    clearcoat: 1.0,
-    clearcoatRoughness: 0.08,
+    clearcoat: 0.7,
+    clearcoatRoughness: 0.25,
     transparent: true,
-    opacity: 0.88
+    opacity: 0.9,
+    depthWrite: false
   });
   const kidneyMesh = new THREE.Mesh(kidneyGeo, kidneyCortexMat);
+  kidneyMesh.renderOrder = 2;
   kidneyGroup.add(kidneyMesh);
 
   const pyramidMat = new THREE.MeshPhysicalMaterial({
-    color: 0x691525,
+    color: 0x8a2230,
     emissive: 0x24040a,
     roughness: 0.36,
     bumpMap: tissueBumpTex,
     bumpScale: 0.025,
-    clearcoat: 0.65
+    clearcoat: 0.3,
+    clearcoatRoughness: 0.4
   });
 
+  // Collecting system (urothelium). Only its inner far wall is drawn, like an
+  // anatomical cutaway: once the kidney's shell fades for treatment you look
+  // straight into the pelvis and calyces, with the stone and scope inside.
   const calyxMat = new THREE.MeshPhysicalMaterial({
-    color: 0xebd0cb,
-    attenuationColor: new THREE.Color(0x9e4b4c),
-    attenuationDistance: 0.9,
-    transmission: 0.52,
-    thickness: 0.6,
-    roughness: 0.16,
-    clearcoat: 0.9
+    color: 0xd6a57c,
+    roughness: 0.6,
+    clearcoat: 0.25,
+    clearcoatRoughness: 0.5
   });
+  // The near wall is a thin, glossy veil over that, which gives the pelvis its
+  // rounded volume without hiding what is inside.
+  const calyxVeilMat = new THREE.MeshPhysicalMaterial({
+    color: 0xf0cfa6,
+    roughness: 0.3,
+    clearcoat: 0.6,
+    clearcoatRoughness: 0.3,
+    transparent: true,
+    opacity: 0.2,
+    depthWrite: false,
+    side: THREE.BackSide
+  });
+  function addLining(geo) {
+    kidneyGroup.add(new THREE.Mesh(geo, calyxMat));
+    const veil = new THREE.Mesh(geo, calyxVeilMat);
+    veil.renderOrder = 1;
+    kidneyGroup.add(veil);
+  }
 
+  // A tube whose radius changes along its length (funnels, cups, sacs).
+  // `radiusAt(t)` gives the radius at t = 0..1; `flatten` squashes it front to back.
+  function taperedTube(points, radiusAt, { segments = 28, radial = 20, flatten = 1 } = {}) {
+    const curve = new THREE.CatmullRomCurve3(points);
+    const Z = new THREE.Vector3(0, 0, 1);
+    const T = new THREE.Vector3();
+    const N = new THREE.Vector3();
+    const B = new THREE.Vector3();
+    const positions = new Float32Array((segments + 1) * (radial + 1) * 3);
+    const indices = [];
+    for (let i = 0; i <= segments; i++) {
+      const t = i / segments;
+      const c = curve.getPointAt(t);
+      const r = radiusAt(t);
+      // A fixed frame (depth axis plus the in-plane normal) keeps the surface
+      // smooth; these curves lie almost flat in the kidney's plane.
+      curve.getTangentAt(t, T);
+      B.copy(Z).addScaledVector(T, -Z.dot(T)).normalize();
+      N.crossVectors(B, T).normalize();
+      for (let k = 0; k <= radial; k++) {
+        const th = (k / radial) * Math.PI * 2;
+        const ox = r * (Math.cos(th) * N.x + Math.sin(th) * B.x);
+        const oy = r * (Math.cos(th) * N.y + Math.sin(th) * B.y);
+        const oz = r * (Math.cos(th) * N.z + Math.sin(th) * B.z) * flatten;
+        const idx = (i * (radial + 1) + k) * 3;
+        positions[idx] = c.x + ox;
+        positions[idx + 1] = c.y + oy;
+        positions[idx + 2] = c.z + oz;
+      }
+    }
+    for (let i = 0; i < segments; i++) {
+      for (let k = 0; k < radial; k++) {
+        const p0 = i * (radial + 1) + k;
+        const p1 = (i + 1) * (radial + 1) + k;
+        // Wound so the faces point inwards: only the far inner wall is drawn.
+        indices.push(p0, p1, p0 + 1, p1, p1 + 1, p0 + 1);
+      }
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geo.setIndex(indices);
+    geo.computeVertexNormals();
+    return geo;
+  }
+  // Piecewise-linear radius profile: [[t, r], ...]
+  const profile = stops => t => {
+    for (let i = 1; i < stops.length; i++) {
+      if (t <= stops[i][0]) {
+        const [t0, r0] = stops[i - 1];
+        const [t1, r1] = stops[i];
+        const k = smoothstep(t0, t1, t);
+        return r0 + (r1 - r0) * k;
+      }
+    }
+    return stops[stops.length - 1][1];
+  };
+  const V = (x, y, z = 0) => new THREE.Vector3(x, y, z);
+
+  // Where the ureter leaves the kidney (root coordinates), and the same point
+  // in the kidney's own coordinates.
+  const UPJ_ROOT = V(0.46, 3.92, 0.02);
+  kidneyGroup.updateMatrixWorld(true);
+  const upjLocal = kidneyGroup.worldToLocal(UPJ_ROOT.clone());
+
+  // Renal pelvis: a roomy, slightly flattened funnel that narrows into the ureter.
+  addLining(
+    taperedTube(
+      [V(0.22, 0.02), V(0.0, 0.03), V(-0.24, -0.04), upjLocal.clone().lerp(V(-0.24, -0.04), 0.35), upjLocal],
+      profile([[0, 0.03], [0.12, 0.26], [0.42, 0.4], [0.75, 0.3], [1, 0.2]]),
+      { segments: 36, radial: 28, flatten: 0.62 }
+    )
+  );
+
+  // Three major calyces branch off the pelvis towards the upper, middle and
+  // lower groups of pyramids. The lower one is where kidney stones are treated.
+  const MAJOR = {
+    upper: [V(-0.02, 0.2), V(0.08, 0.48), V(0.16, 0.74)],
+    middle: [V(0.1, 0.03), V(0.22, 0.03), V(0.34, 0.02)],
+    lower: [V(-0.04, -0.18), V(0.04, -0.46), V(0.13, -0.72)]
+  };
+  addLining(taperedTube(MAJOR.upper, profile([[0, 0.2], [0.5, 0.15], [1, 0.15]]), { flatten: 0.8 }));
+  addLining(taperedTube(MAJOR.middle, profile([[0, 0.2], [1, 0.15]]), { segments: 10, flatten: 0.8 }));
+  addLining(taperedTube(MAJOR.lower, profile([[0, 0.24], [0.45, 0.21], [1, 0.25]]), { flatten: 0.8 }));
+
+  // Pyramids, each capped by a cup-shaped minor calyx that drains into the
+  // nearest major calyx.
   const pyramidAngles = [-1.12, -0.76, -0.38, 0.0, 0.38, 0.76, 1.12];
-  const pelvisHub = new THREE.Vector3(-0.36, -0.06, 0.0);
-
+  // A rounded pyramid: broad base in the cortex, blunt papilla pointing at its calyx.
+  const pyramidGeo = new THREE.LatheGeometry(
+    [
+      [0.001, 0.27],
+      [0.05, 0.25],
+      [0.1, 0.17],
+      [0.19, 0.02],
+      [0.26, -0.12],
+      [0.27, -0.21],
+      [0.21, -0.28],
+      [0.001, -0.3]
+    ].map(([r, y]) => new THREE.Vector2(r, y)),
+    32
+  );
+  pyramidGeo.scale(1, 1, 0.82);
+  pyramidGeo.computeVertexNormals();
   pyramidAngles.forEach((ang, idx) => {
-    const zOffset = idx % 2 === 0 ? 0.11 : -0.11;
-    const radiusOut = 0.74;
-    const px = Math.cos(ang) * radiusOut - 0.06 * (ang * ang);
-    const py = Math.sin(ang) * 1.24;
+    const zOffset = idx % 2 === 0 ? 0.1 : -0.1;
+    const px = Math.cos(ang) * 0.72 - 0.08 * (ang * ang);
+    const py = Math.sin(ang) * 1.18;
+    const major = ang < -0.5 ? MAJOR.lower : ang > 0.5 ? MAJOR.upper : MAJOR.middle;
+    const drain = major[2];
 
-    const pGeo = new THREE.ConeGeometry(0.23, 0.52, 24, 4);
-    const pMesh = new THREE.Mesh(pGeo, pyramidMat);
+    const pMesh = new THREE.Mesh(pyramidGeo, pyramidMat);
     pMesh.position.set(px, py, zOffset);
-
-    const dirToPelvis = new THREE.Vector3()
-      .subVectors(pelvisHub, pMesh.position)
-      .normalize();
-    pMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dirToPelvis);
+    const dirToCalyx = new THREE.Vector3().subVectors(drain, pMesh.position).normalize();
+    pMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dirToCalyx);
     kidneyGroup.add(pMesh);
 
-    const papillaTip = pMesh.position
-      .clone()
-      .addScaledVector(dirToPelvis, 0.22);
-    const midCtrl = papillaTip
-      .clone()
-      .lerp(pelvisHub, 0.55)
-      .add(new THREE.Vector3(0, 0, zOffset * 0.4));
-    const calyxCurve = new THREE.CatmullRomCurve3([
-      papillaTip,
-      midCtrl,
-      pelvisHub.clone()
-    ]);
-    const calyxGeo = new THREE.TubeGeometry(calyxCurve, 16, 0.075, 14, false);
-    kidneyGroup.add(new THREE.Mesh(calyxGeo, calyxMat));
+    const papilla = pMesh.position.clone().addScaledVector(dirToCalyx, 0.24);
+    const cupRim = papilla.clone().addScaledVector(dirToCalyx, -0.14);
+    const neck = papilla.clone().lerp(drain, 0.55);
+    addLining(
+      taperedTube([drain.clone(), neck, papilla, cupRim], profile([[0, 0.11], [0.45, 0.085], [0.8, 0.13], [1, 0.2]]), {
+        segments: 18,
+        radial: 16,
+        flatten: 0.85
+      })
+    );
   });
 
-  const pelvisCurve = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(-0.18, 0.12, 0),
-    new THREE.Vector3(-0.42, -0.08, 0.02),
-    new THREE.Vector3(-0.68, -0.48, 0.05)
-  ]);
-  const pelvisGeo = new THREE.TubeGeometry(pelvisCurve, 24, 0.21, 20, false);
-  kidneyGroup.add(new THREE.Mesh(pelvisGeo, calyxMat));
+  // The path an instrument (or a stone) takes inside the kidney: from the top
+  // of the ureter, across the pelvis and down into the lower calyx.
+  const renalCurve = new THREE.CatmullRomCurve3(
+    [
+      upjLocal.clone(),
+      V(-0.34, -0.02, 0.02),
+      V(-0.17, 0.07, 0.02),
+      V(-0.02, 0.0, 0.02),
+      V(0.03, -0.24, 0.02),
+      V(0.07, -0.48, 0.02),
+      V(0.1, -0.64, 0.02)
+    ].map(pt => kidneyGroup.localToWorld(pt))
+  );
 
   const arteryMat = new THREE.MeshPhysicalMaterial({
     color: 0xb82032,
@@ -350,18 +468,18 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
 
   const arteryGroup = new THREE.Group();
   const mainArtery = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(-2.15, 0.28, -0.16),
-    new THREE.Vector3(-1.35, 0.22, -0.14),
-    new THREE.Vector3(-0.62, 0.14, -0.10),
-    new THREE.Vector3(-0.22, 0.16, -0.06)
+    new THREE.Vector3(-1.6, 0.61, -0.16),
+    new THREE.Vector3(-1.15, 0.56, -0.14),
+    new THREE.Vector3(-0.62, 0.48, -0.10),
+    new THREE.Vector3(-0.22, 0.50, -0.06)
   ]);
   arteryGroup.add(
     new THREE.Mesh(new THREE.TubeGeometry(mainArtery, 28, 0.125, 16, false), arteryMat)
   );
   const supArtery = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(-0.92, 0.18, -0.12),
-    new THREE.Vector3(-0.55, 0.42, -0.06),
-    new THREE.Vector3(-0.20, 0.62, 0.02)
+    new THREE.Vector3(-0.92, 0.52, -0.12),
+    new THREE.Vector3(-0.55, 0.76, -0.06),
+    new THREE.Vector3(-0.20, 0.96, 0.02)
   ]);
   arteryGroup.add(
     new THREE.Mesh(new THREE.TubeGeometry(supArtery, 20, 0.068, 12, false), arteryMat)
@@ -369,10 +487,10 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   kidneyGroup.add(arteryGroup);
 
   const mainVein = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(-2.22, -0.04, 0.18),
-    new THREE.Vector3(-1.32, -0.02, 0.18),
-    new THREE.Vector3(-0.58, -0.02, 0.14),
-    new THREE.Vector3(-0.20, -0.02, 0.08)
+    new THREE.Vector3(-1.66, 0.30, 0.18),
+    new THREE.Vector3(-1.15, 0.32, 0.18),
+    new THREE.Vector3(-0.58, 0.32, 0.14),
+    new THREE.Vector3(-0.20, 0.32, 0.08)
   ]);
   kidneyGroup.add(
     new THREE.Mesh(new THREE.TubeGeometry(mainVein, 28, 0.165, 18, false), veinMat)
@@ -382,7 +500,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   // 5. 3D ANATOMICAL S-CURVE URETER (Real-Time Elastic 3D Mesh Deformation)
   // =========================================================================
   const ureterCurve = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(0.46, 3.92, 0.02),
+    UPJ_ROOT.clone(),
     new THREE.Vector3(0.14, 3.32, 0.07),
     new THREE.Vector3(-0.04, 2.55, 0.14),
     new THREE.Vector3(-0.14, 1.35, 0.24),
@@ -392,6 +510,14 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     new THREE.Vector3(-0.12, -3.55, 0.06),
     new THREE.Vector3(-0.04, -4.28, 0.12)
   ]);
+
+  // One parameter for the whole urinary tract: 0..1 runs down the ureter, and
+  // negative values run back up into the kidney, ending in the lower calyx.
+  const RENAL_SPAN = renalCurve.getLength() / ureterCurve.getLength();
+  function tractAt(v, out = new THREE.Vector3()) {
+    if (v >= 0) return out.copy(ureterCurve.getPointAt(Math.min(1, v)));
+    return out.copy(renalCurve.getPointAt(Math.min(1, -v / RENAL_SPAN)));
+  }
 
   const iliacArtCurve = new THREE.CatmullRomCurve3([
     new THREE.Vector3(-1.35, 0.72, 0.06),
@@ -434,7 +560,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
 
     let r = 0.145;
     if (u < 0.12) {
-      r = 0.34 - smoothstep(0.0, 0.12, u) * 0.225;
+      r = 0.2 - smoothstep(0.0, 0.12, u) * 0.085;
     } else {
       const upjPinch = Math.exp(-Math.pow((u - 0.12) / 0.045, 2)) * 0.032;
       const iliacPinch = Math.exp(-Math.pow((u - 0.48) / 0.055, 2)) * 0.030;
@@ -687,6 +813,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
       depthWrite: false
     });
     const rMesh = new THREE.Mesh(rGeo, rMat);
+    rMesh.renderOrder = 3;
     organRoot.add(rMesh);
     spasmRings.push(rMesh);
   }
@@ -722,6 +849,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     opacity: 0
   });
   const laserBeamMesh = new THREE.Mesh(laserBeamGeo, laserBeamMat);
+  laserBeamMesh.renderOrder = 3;
   organRoot.add(laserBeamMesh);
 
   const plasmaFlashMesh = new THREE.Mesh(
@@ -732,12 +860,12 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   const laserFlashLight = new THREE.PointLight(0x22d3ee, 0, 3.4, 1.5);
   organRoot.add(laserFlashLight);
 
-  // The PCNL sheath enters through the back of the kidney and stops just
-  // short of where a kidney stone sits.
-  const pcnlTip = ureterCurve.getPointAt(0.065).add(new THREE.Vector3(0.34, 0.03, 0.05));
+  // The PCNL sheath enters through the back of the kidney's lower pole and
+  // stops just short of the stone in the lower calyx.
+  const pcnlTip = tractAt(-RENAL_SPAN).add(new THREE.Vector3(0.3, -0.1, 0.06));
   const pcnlCurve = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(2.95, 3.5, 0.36),
-    new THREE.Vector3(1.85, 3.66, 0.2),
+    new THREE.Vector3(3.0, 2.75, 0.42),
+    new THREE.Vector3(2.1, 3.02, 0.26),
     pcnlTip.clone()
   ]);
   const pcnlSheathMat = new THREE.MeshStandardMaterial({
@@ -770,17 +898,22 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
       new THREE.Vector3(-0.04, -4.28, 0.12)
     ];
 
-    const clampedTip = Math.max(0.04, Math.min(0.99, tipU));
+    const clampedTip = Math.max(-RENAL_SPAN, Math.min(0.99, tipU));
     if (tipU < 1.0) {
-      const steps = clampedTip < 0.35 ? 36 : 18;
+      const ureterEnd = Math.max(0, clampedTip);
+      const steps = ureterEnd < 0.35 ? 30 : 18;
       for (let s = 1; s <= steps; s++) {
-        const u = 1.0 - (1.0 - clampedTip) * (s / steps);
-        pts.push(ureterCurve.getPointAt(u));
+        pts.push(tractAt(1.0 - (1.0 - ureterEnd) * (s / steps)));
+      }
+      // Inside the kidney the scope bends tightly, so sample it more finely.
+      if (clampedTip < 0) {
+        const renalSteps = Math.max(2, Math.ceil((-clampedTip / RENAL_SPAN) * 18));
+        for (let s = 1; s <= renalSteps; s++) pts.push(tractAt(clampedTip * (s / renalSteps)));
       }
     }
 
     const curve = new THREE.CatmullRomCurve3(pts);
-    const geo = new THREE.TubeGeometry(curve, 52, 0.044, 14, false);
+    const geo = new THREE.TubeGeometry(curve, 110, 0.044, 14, false);
     scopeMesh = new THREE.Mesh(geo, scopeSheathMat);
     scopeGroup.add(scopeMesh);
 
@@ -855,6 +988,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     blending: THREE.AdditiveBlending
   });
   const dustPoints = new THREE.Points(dustGeo, dustMat);
+  dustPoints.renderOrder = 3;
   organRoot.add(dustPoints);
 
   const bokehGeo = new THREE.BufferGeometry();
@@ -961,7 +1095,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   // Tissue finish: keep the wet clearcoat, add a faint deep-red sheen at grazing
   // angles for a soft-tissue look. Phones skip the costly transmission pass.
   kidneyCortexMat.color.setHex(0xb8343f);
-  [kidneyCortexMat, ureterMat, bladderMat, prostateMat, calyxMat, pyramidMat].forEach(m => {
+  [kidneyCortexMat, ureterMat, bladderMat, prostateMat, pyramidMat].forEach(m => {
     m.sheen = 0.3;
     m.sheenColor = new THREE.Color(0xff5a4a);
     m.sheenRoughness = 0.55;
@@ -981,9 +1115,9 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   // value j (0 hero, 1 symptoms, 2 treatment, 3 prostate) plus a few eased
   // "mix" values for the pickers, so nothing in the scene ever cuts.
   // -------------------------------------------------------------------------
-  const SITE_ORIGIN = 0.02; // stone starts in the renal pelvis
-  const SITE_URETER = 0.28; // stuck in the upper ureter (treated by URSL)
-  const SITE_KIDNEY = 0.065; // stays in the kidney (treated by RIRS or PCNL)
+  const SITE_KIDNEY = -RENAL_SPAN; // lower calyx: where the stone forms, and where RIRS or PCNL treats it
+  const SITE_ORIGIN = SITE_KIDNEY;
+  const SITE_URETER = 0.22; // stuck in the upper ureter (treated by URSL)
   const PROSTATE_FOCUS = new THREE.Vector3(0.15, -5.45, 0);
   const PCNL_TIP = pcnlTip;
   const UP = new THREE.Vector3(0, 1, 0);
@@ -997,6 +1131,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
   const focus = new THREE.Vector3();
   const tractPt = new THREE.Vector3();
   const beamDir = new THREE.Vector3();
+  const dustTmp = new THREE.Vector3();
   let primed = false;
   let lastElapsed = 0;
   let frameCount = 0;
@@ -1044,7 +1179,6 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
 
     const heartWave = Math.pow(Math.max(0, Math.sin(elapsed * 3.55)), 4);
     arteryGroup.scale.setScalar(1 + heartWave * 0.025);
-    kidneyGroup.position.y = 4.18 + Math.sin(elapsed * 1.1) * 0.03;
 
     appState.userYawCurrent += (appState.userYawTarget - appState.userYawCurrent) * 0.10;
     appState.userPitchCurrent += (appState.userPitchTarget - appState.userPitchCurrent) * 0.10;
@@ -1058,7 +1192,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     const pathU = stoneUFor(renalMix);
     const stoneU = stoneUFor(renalMix < 0.5 ? 0 : 1);
     const swapScale = Math.min(1, Math.abs(renalMix * 2 - 1) * 1.6);
-    const stoneCenter = ureterCurve.getPointAt(stoneU);
+    const stoneCenter = tractAt(stoneU);
     const baseStoneRadius = 0.108 + (mix.mm - 4) * 0.0095;
     const intactScale = Math.max(0, 1 - erosion * 0.95) * swapScale;
     const activeStoneRadius = baseStoneRadius * intactScale;
@@ -1094,8 +1228,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
 
     // Fade the kidney's outer shell while treating inside it, so the stone and
     // instruments stay visible.
-    kidneyCortexMat.opacity = kidneyBaseOpacity - (kidneyBaseOpacity - 0.34) * treat * renalMix;
-    kidneyCortexMat.thickness = lerp(1.95, 0.15, treat * renalMix);
+    kidneyCortexMat.opacity = kidneyBaseOpacity - (kidneyBaseOpacity - 0.3) * treat * renalMix;
 
     // Instruments.
     laserBeamMesh.visible = false;
@@ -1109,7 +1242,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
 
     const scopeReach = treat * mix.scope;
     if (scopeReach > 0.01) {
-      const desiredTipU = Math.min(0.99, pathU + 0.05);
+      const desiredTipU = Math.min(0.99, pathU + lerp(0.05, 0.03, renalMix));
       const scopeInfo = rebuildScopeTube(1.07 - (1.07 - desiredTipU) * scopeReach);
       if (scopeInfo && scopeReach > 0.9) {
         scopeHeadlamp.intensity = 0.55;
@@ -1146,7 +1279,8 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     const burstOriginU = lerp(SITE_URETER, SITE_KIDNEY, renalMix);
     const spanScale = lerp(0.6, 0.72, renalMix);
     const showBurst = dustProgress > 0.01;
-    shardInstanced.visible = showBurst && flushProgress < 0.55;
+    // Fragments for a ureter stone; a kidney stone is dusted instead (fine particles only).
+    shardInstanced.visible = showBurst && flushProgress < 0.55 && renalMix < 0.5;
     if (shardInstanced.visible) {
       for (let i = 0; i < SHARD_COUNT; i++) {
         const s = shardSeeds[i];
@@ -1156,7 +1290,7 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
           dummyObj.scale.setScalar(0.0001);
         } else {
           const driftU = Math.min(0.99, burstOriginU + localT * 0.14);
-          dummyObj.position.copy(ureterCurve.getPointAt(driftU)).addScaledVector(s.dir, localT * 0.1);
+          dummyObj.position.copy(tractAt(driftU)).addScaledVector(s.dir, localT * 0.1);
           dummyObj.rotation.set(elapsed * s.rotSpeed.x, elapsed * s.rotSpeed.y, elapsed * s.rotSpeed.z);
           dummyObj.scale.setScalar(s.scale * shrink);
         }
@@ -1173,7 +1307,10 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
 
       for (let i = 0; i < DUST_COUNT; i++) {
         const m = dustMeta[i];
-        const dustTravel = (dustProgress * 0.4 + flushProgress * 1.3) * m.speed - m.offset * 0.42;
+        // While the laser works, dust from a kidney stone swirls inside the calyx and
+        // pelvis; it only drains down the ureter on the flush.
+        const dustTravel =
+          (dustProgress * lerp(0.4, 0.16, renalMix) + flushProgress * 1.3) * m.speed - m.offset * lerp(0.42, 0.12, renalMix);
 
         if (dustTravel <= 0) {
           dustPos[i * 3 + 1] = -999;
@@ -1181,7 +1318,14 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
         }
 
         const uTrack = burstOriginU + dustTravel * spanScale;
-        if (uTrack <= 1.0) {
+        if (uTrack < 0) {
+          tractAt(uTrack, dustTmp);
+          const ang = m.angle + elapsed * 1.6 + uTrack * 30.0;
+          const rad = 0.15 * m.radial;
+          dustPos[i * 3] = dustTmp.x + Math.cos(ang) * rad;
+          dustPos[i * 3 + 1] = dustTmp.y + Math.sin(ang * 1.3 + m.angle) * rad * 0.8;
+          dustPos[i * 3 + 2] = dustTmp.z + Math.sin(ang) * rad * 0.6;
+        } else if (uTrack <= 1.0) {
           const idxRing = Math.min(U_RINGS, Math.floor(uTrack * U_RINGS));
           const cPt = ureterCenters[idxRing];
           const N = ureterFrames.normals[idxRing];
@@ -1231,9 +1375,9 @@ export function initUrology3DScene({ container, lowPower = false, onFirstFrame }
     const e01 = smoothstep(0, 1, j);
     const e12 = smoothstep(1, 2, j);
     const e23 = smoothstep(2.4, 3, j);
-    focus.set(lerp(lerp(0.65, 0.7, e01), 0.75, e12), lerp(lerp(4.15, 3.4, e01), 2.75, e12), 0);
+    focus.set(lerp(lerp(0.65, 0.8, e01), 0.95, e12), lerp(lerp(4.15, 3.5, e01), 3.1, e12), 0);
     if (e23 > 0) focus.lerp(tractPoint(e23, tractPt), smoothstep(0, 0.3, e23));
-    const camDist = lerp(lerp(lerp(6.2, 6.6, e01), 7.4, e12), 5.9, e23) - Math.sin(e23 * Math.PI) * 0.5;
+    const camDist = lerp(lerp(lerp(6.2, 6.6, e01), 7.0, e12), 5.9, e23) - Math.sin(e23 * Math.PI) * 0.5;
     const camElev = lerp(lerp(lerp(0.35, 0.25, e01), 0.15, e12), 0.18, e23);
     const sway = Math.sin(j * 1.25) * 0.3 * (1 - treat);
 
