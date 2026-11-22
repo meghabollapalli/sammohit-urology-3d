@@ -368,6 +368,27 @@
         </div>
       </section>
 
+      <!-- Google rating: the figure and a link out only. Patient review text stays on Google. -->
+      <section class="section section-ink reviews" aria-labelledby="reviews-title" data-requires="reviews">
+        <div class="wrap reviews-wrap">
+          <div class="reviews-score" data-reveal>
+            <p class="reviews-figure"><span class="sr-only">Rated </span>{{reviewsRating}}<span class="sr-only"> out of 5 on Google</span></p>
+            <p class="reviews-stars" aria-hidden="true"><!-- @stars --></p>
+          </div>
+          <div class="reviews-body">
+            <p class="label" data-reveal>Patient reviews</p>
+            <h2 id="reviews-title" class="display-lg" data-split>{{reviewsCount}} reviews <em>on Google.</em></h2>
+            <p class="section-lead" data-reveal>
+              Patients rate and review the clinic on its public Google listing. Read every review there, in the patients’ own words, or add your own after a visit.
+            </p>
+            <div class="cta-row" data-reveal>
+              <a class="btn btn-accent" href="{{mapsUrl}}" target="_blank" rel="noopener"><span>Read all reviews on Google</span><i class="arrow arrow-out" aria-hidden="true"></i><span class="sr-only"> (opens in a new tab)</span></a>
+            </div>
+            <p class="reviews-note" data-reveal>Rating as shown on Google on {{reviewsAsOf}}.</p>
+          </div>
+        </div>
+      </section>
+
       <!-- FAQ -->
       <section class="section section-bone" id="faq" aria-labelledby="faq-title">
         <div class="wrap faq-layout">

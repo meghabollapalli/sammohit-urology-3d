@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clinic as real } from '../../src/clinic.config.js';
+import { clinic as real } from '../fixtures/clinic.empty.js';
 import { clinic as full } from '../fixtures/clinic.fixture.js';
 import {
   bookingChannel,
@@ -78,7 +78,7 @@ describe('address and hours', () => {
 });
 
 describe('missingFields', () => {
-  it('lists every empty field in the shipped config', () => {
+  it('lists every empty field in an incomplete config', () => {
     expect(missingFields(real).length).toBeGreaterThan(0);
     expect(missingFields(real).join(' ')).toContain('contact.phone');
   });

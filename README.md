@@ -40,5 +40,6 @@ npm run test:e2e     # Playwright end-to-end + axe accessibility tests (desktop 
 ## Content rules
 
 - Facts only: qualifications, procedures, how they work, contact details. No outcome percentages, superlatives, testimonials or before/after images.
+- The Google rating block shows only the rating, review count and date from `googleReviews` in the config, with a link to the listing. Patient review text and names are not copied onto the site.
 - Never put a guessed phone number, address or registration number in the config.
 - Name procedures in plain words first, abbreviation second.

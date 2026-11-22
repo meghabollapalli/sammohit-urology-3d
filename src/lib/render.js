@@ -9,7 +9,7 @@
  *   <!-- @visit-details -->
  *   <tag data-requires="phone">…</tag>  removed when the clinic has no phone
  *   <tag data-requires-not="booking">…  removed when the clinic DOES have it
- * Capabilities: phone, whatsapp, booking, email, address, hours, registration, languages.
+ * Capabilities: phone, whatsapp, booking, email, address, hours, registration, languages, reviews.
  * Elements using data-requires must not contain a nested element with the same tag name.
  */
 import {
@@ -40,7 +40,22 @@ export function capabilities(clinic) {
     address: Boolean(formatAddress(clinic)),
     hours: Boolean(formatHours(clinic)),
     registration: Boolean(clinic.doctor?.registrationNumber),
-    languages: Boolean(clinic.doctor?.languages?.length)
+    languages: Boolean(clinic.doctor?.languages?.length),
+    reviews: Boolean(googleRating(clinic))
+  };
+}
+
+/** { rating: '5.0', count: '68', asOf: '22 November 2026', stars: 5 } or null. */
+export function googleRating(clinic) {
+  const g = clinic.googleReviews;
+  if (!g || typeof g.rating !== 'number' || !(g.count > 0) || !/^\d{4}-\d{2}-\d{2}$/.test(g.asOf || '')) return null;
+  const [y, m, d] = g.asOf.split('-').map(Number);
+  const month = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][m - 1];
+  return {
+    rating: g.rating.toFixed(1),
+    count: g.count.toLocaleString('en-IN'),
+    asOf: `${d} ${month} ${y}`,
+    stars: Math.max(0, Math.min(5, Math.round(g.rating)))
   };
 }
 
@@ -110,6 +125,7 @@ function stripByCapability(html, caps) {
 export function renderIndexHtml(html, clinic, faqs) {
   const caps = capabilities(clinic);
   const procedures = clinic.doctor.proceduresPerformed;
+  const rating = googleRating(clinic);
   const tokens = {
     clinicName: clinic.name,
     doctorName: clinic.doctor.name,
@@ -125,11 +141,20 @@ export function renderIndexHtml(html, clinic, faqs) {
     siteUrl: clinic.siteUrl,
     registration: clinic.doctor.registrationNumber || '',
     languages: (clinic.doctor.languages || []).join(', '),
+    reviewsRating: rating ? rating.rating : '',
+    reviewsCount: rating ? rating.count : '',
+    reviewsAsOf: rating ? rating.asOf : '',
     year: String(new Date().getFullYear())
   };
 
   let out = stripByCapability(html, caps);
   out = out.replace('<!-- @faq -->', renderFaq(faqs));
+  out = out.replace(
+    '<!-- @stars -->',
+    rating
+      ? Array.from({ length: 5 }, (_, i) => `<i class="star${i < rating.stars ? '' : ' star-off'}"></i>`).join('')
+      : ''
+  );
   out = out.replace('<!-- @visit-details -->', renderVisitDetails(clinic));
   out = out.replace(
     '<!-- @jsonld -->',

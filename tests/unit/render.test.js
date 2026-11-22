@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { clinic as real } from '../../src/clinic.config.js';
+import { clinic as real } from '../fixtures/clinic.empty.js';
 import { faqs } from '../../src/content/faq.js';
+import { clinic as shipped } from '../../src/clinic.config.js';
 import { clinic as full } from '../fixtures/clinic.fixture.js';
 import { escapeHtml, renderIndexHtml } from '../../src/lib/render.js';
 import { buildJsonLd } from '../../src/lib/schema.js';
@@ -13,7 +14,7 @@ function jsonLd(html) {
   return JSON.parse(m[1]);
 }
 
-describe('renderIndexHtml with the shipped (incomplete) config', () => {
+describe('renderIndexHtml with an incomplete config', () => {
   const html = renderIndexHtml(template, real, faqs);
 
   it('leaves no template tokens or markers behind', () => {
@@ -88,5 +89,27 @@ describe('safety', () => {
   it('schema matches visible FAQ text', () => {
     const faqNode = buildJsonLd(full, faqs)['@graph'][2];
     expect(faqNode.mainEntity[0].name).toBe(faqs[0].q);
+  });
+});
+
+describe('Google rating block', () => {
+  it('shows the rating, count and date from the config with a link to Google', () => {
+    const html = renderIndexHtml(template, shipped, faqs);
+    const g = shipped.googleReviews;
+    expect(html).toContain(`${g.count} reviews <em>on Google.</em>`);
+    expect(html).toContain('Rating as shown on Google on 22 November 2026.');
+    expect(html.match(/class="star"/g)).toHaveLength(5);
+    expect(html).toContain('Read all reviews on Google');
+  });
+
+  it('is removed when no rating is configured', () => {
+    const html = renderIndexHtml(template, real, faqs);
+    expect(html).not.toContain('reviews-title');
+    expect(html).not.toContain('on Google.</em>');
+  });
+
+  it('never marks the rating up as structured data', () => {
+    const html = renderIndexHtml(template, shipped, faqs);
+    expect(JSON.stringify(jsonLd(html))).not.toMatch(/aggregateRating|"Review"/);
   });
 });
