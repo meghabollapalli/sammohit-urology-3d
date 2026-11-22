@@ -106,13 +106,13 @@ test('booking opens WhatsApp with a ready-written message', async ({ page }) => 
   expect(url.startsWith('https://wa.me/919000000002?text=')).toBe(true);
   const text = decodeURIComponent(url.split('?text=')[1]);
   expect(text).toContain('Name: R.K. <b>');
-  expect(text).toContain('Concern: Men’s sexual health (confidential)');
+  expect(text).toContain('Concern: Andrology (confidential)');
   expect(text).toContain('Preferred time: Evening');
   // Typed text must never be injected into the page as HTML.
   expect(await page.locator('#book b').count()).toBe(0);
 });
 
-test('men’s health link pre-selects the confidential concern', async ({ page }) => {
+test('andrology link pre-selects the confidential concern', async ({ page }) => {
   await page.goto('./');
   await page.getByRole('link', { name: 'Book a private consultation' }).click();
   await expect(page.getByLabel('What is it about?')).toHaveValue('andrology');

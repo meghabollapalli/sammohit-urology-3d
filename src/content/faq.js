@@ -25,7 +25,7 @@ export const faqs = [
     a: 'Both treat an enlarged prostate from the inside, through the urinary passage, with no cut on the skin. TURP removes the blocking tissue in small pieces with an electric loop. HoLEP uses a laser to remove the enlarged part and is suitable for small and very large prostates. The doctor recommends one based on prostate size, your health and the medicines you take.'
   },
   {
-    q: 'Is a men’s sexual health consultation confidential?',
+    q: 'Is an andrology consultation confidential?',
     a: 'Yes. Consultations are private and one to one, and you can book using only your initials. Your partner is welcome to join if you wish.'
   },
   {

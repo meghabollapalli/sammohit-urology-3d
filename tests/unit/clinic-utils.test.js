@@ -50,7 +50,7 @@ describe('booking', () => {
     expect(msg).toBe(
       'Hello, I would like to book a consultation with Dr. G SVS Sammohit.\n' +
         'Name: R.K.\n' +
-        'Concern: Men’s sexual health (confidential)\n' +
+        'Concern: Andrology (confidential)\n' +
         'Preferred time: Evening'
     );
   });
