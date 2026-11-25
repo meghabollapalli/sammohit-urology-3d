@@ -131,14 +131,7 @@ export function renderIndexHtml(html, clinic, faqs, { reviews = [], posts = [] }
   caps.blog = posts.length > 0;
   const procedures = clinic.doctor.proceduresPerformed;
   const rating = googleRating(clinic);
-  // Section numbers follow on from the four fixed sections, skipping any that are hidden.
-  let section = 4;
-  const nextNum = shown => (shown ? String(++section).padStart(2, '0') : '');
   const tokens = {
-    numReviews: nextNum(caps.reviews),
-    numBlog: nextNum(caps.blog),
-    numFaq: nextNum(true),
-    numVisit: nextNum(true),
     clinicName: clinic.name,
     doctorName: clinic.doctor.name,
     doctorTitle: clinic.doctor.title,

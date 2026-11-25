@@ -29,6 +29,10 @@ export const faqs = [
     a: 'Yes. Consultations are private and one to one, and you can book using only your initials. Your partner is welcome to join if you wish.'
   },
   {
+    q: 'What happens at an andrology visit?',
+    a: 'It starts with a private conversation about what is happening. An examination is done only if needed and with your consent. Tests such as blood sugar, hormones or a semen analysis may follow, and the doctor then explains a treatment plan in plain words.'
+  },
+  {
     q: 'Are erectile dysfunction and premature ejaculation treatable?',
     a: 'Both are common and usually treatable. Erectile problems are often linked to diabetes, blood pressure, heart health, hormones or stress, and can be an early sign of heart disease, so a proper check-up matters. Treatment is planned around the cause.'
   },

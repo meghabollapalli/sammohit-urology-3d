@@ -65,7 +65,7 @@ export function initMotion() {
     );
     revealables.forEach(el => io.observe(el));
     // Stagger siblings in lists so rows cascade.
-    document.querySelectorAll('.index-list, .proc-list, .mens-grid').forEach(list => {
+    document.querySelectorAll('.index-list, .proc-list, .andro-main').forEach(list => {
       [...list.children].forEach((child, n) => child.style.setProperty('--delay', `${(n % 6) * 0.08}s`));
     });
   }

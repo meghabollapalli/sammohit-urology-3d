@@ -100,7 +100,7 @@ describe('Google reviews section', () => {
   const html = renderIndexHtml(template, shipped, faqs, { reviews });
 
   it('shows the rating from the config, without a review count', () => {
-    expect(html).toContain('Rated 5.0 <em>on Google.</em>');
+    expect(html).toContain('Rated 5.0 on Google.');
     expect(html).toContain('Read all reviews on Google');
     expect(html).toContain('href="#reviews"');
     expect(html).not.toMatch(/\b68\b/);
@@ -144,9 +144,9 @@ describe('blog', () => {
     const off = renderIndexHtml(template, shipped, faqs);
     expect(off).not.toContain('id="blog"');
     expect(off).not.toContain('href="#blog"');
-    // Later sections close the gap in the numbering.
-    expect(html).toContain('(07) Answers');
-    expect(off).toContain('(06) Answers');
+    // Sections are not numbered, so hiding one leaves no gap.
+    expect(html).not.toMatch(/\(0\d\)/);
+    expect(off).not.toMatch(/\(0\d\)/);
   });
 
   it('marks draft posts and keeps search engines away from them', () => {

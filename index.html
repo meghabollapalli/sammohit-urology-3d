@@ -51,14 +51,14 @@
 
       <nav class="primary-nav" id="primary-nav" aria-label="Main">
         <ul>
-          <li><a href="#stones"><span class="nav-num" aria-hidden="true">01</span>Kidney stones</a></li>
-          <li><a href="#prostate"><span class="nav-num" aria-hidden="true">02</span>Prostate</a></li>
-          <li><a href="#andrology"><span class="nav-num" aria-hidden="true">03</span>Andrology</a></li>
-          <li><a href="#doctor"><span class="nav-num" aria-hidden="true">04</span>Doctor</a></li>
-          <li data-requires="reviews"><a href="#reviews"><span class="nav-num" aria-hidden="true">{{numReviews}}</span>Reviews</a></li>
-          <li data-requires="blog"><a href="#blog"><span class="nav-num" aria-hidden="true">{{numBlog}}</span>{{blogTitle}}</a></li>
-          <li><a href="#faq"><span class="nav-num" aria-hidden="true">{{numFaq}}</span>Questions</a></li>
-          <li><a href="#visit"><span class="nav-num" aria-hidden="true">{{numVisit}}</span>Visit</a></li>
+          <li><a href="#stones">Kidney stones</a></li>
+          <li><a href="#prostate">Prostate</a></li>
+          <li><a href="#andrology">Andrology</a></li>
+          <li><a href="#doctor">Doctor</a></li>
+          <li data-requires="reviews"><a href="#reviews">Reviews</a></li>
+          <li data-requires="blog"><a href="#blog">{{blogTitle}}</a></li>
+          <li><a href="#faq">Questions</a></li>
+          <li><a href="#visit">Visit</a></li>
         </ul>
       </nav>
 
@@ -89,9 +89,9 @@
 
       <nav class="chapters" aria-label="Treatment journey">
         <ol>
-          <li><a href="#symptoms" data-chapter="symptoms"><span>01</span> Symptoms</a></li>
-          <li><a href="#stones" data-chapter="stones"><span>02</span> Treatment</a></li>
-          <li><a href="#prostate" data-chapter="prostate"><span>03</span> Prostate</a></li>
+          <li><a href="#symptoms" data-chapter="symptoms">Symptoms</a></li>
+          <li><a href="#stones" data-chapter="stones">Treatment</a></li>
+          <li><a href="#prostate" data-chapter="prostate">Prostate</a></li>
         </ol>
       </nav>
 
@@ -99,7 +99,7 @@
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-inner">
           <p class="hero-eyebrow" data-reveal>
-            <span class="dot" aria-hidden="true"></span>{{doctorName}} <span class="sep" aria-hidden="true">/</span> {{degreesShort}}
+            {{doctorName}}, {{degreesShort}}
           </p>
           <h1 id="hero-title" class="display" data-split>
             Precision care for <em>Kidney stones,</em> Prostate &amp; <em>Andrology.</em>
@@ -107,30 +107,24 @@
           <div class="hero-foot">
             <div class="hero-copy" data-reveal>
               <p class="lead">
-                Laser treatment for kidney stones, usually without a cut. Modern care for an enlarged prostate. Private andrology consultations for erectile dysfunction, premature ejaculation and other sexual health concerns.
+                Laser stone treatment without a cut, prostate care, and private treatment for erectile dysfunction and premature ejaculation.
               </p>
               <div class="cta-row">
                 <a class="btn btn-accent" href="#book"><span>Book a consultation</span><i class="arrow" aria-hidden="true"></i></a>
                 <a class="btn btn-line" href="{{tel}}" data-requires="phone"><span>Call {{phoneDisplay}}</span></a>
-                <a class="btn btn-line" href="{{mapsUrl}}" target="_blank" rel="noopener"><span>Directions</span><i class="arrow arrow-out" aria-hidden="true"></i><span class="sr-only"> (opens Google Maps)</span></a>
               </div>
               <button type="button" class="load-3d" id="load-3d" hidden>Show the interactive 3D model</button>
             </div>
-            <ul class="hero-stats" aria-label="At a glance" data-reveal>
-              <li><strong>M.Ch</strong><span>Urology, super-specialty</span></li>
-              <li><strong>{{procedures}}</strong><span>Procedures performed</span></li>
-            </ul>
           </div>
         </div>
-        <a class="scroll-cue" href="#symptoms" aria-label="Scroll to the treatment journey"><span aria-hidden="true"></span></a>
       </section>
 
       <!-- 01 Symptoms (3D: ureter) -->
       <section class="chapter" id="symptoms" aria-labelledby="symptoms-title">
         <div class="chapter-panel">
           <div class="panel-card">
-          <p class="chapter-label" data-reveal><span class="chapter-num">01</span> Symptoms</p>
-          <h2 id="symptoms-title" class="display-md" data-split>When a stone <em>starts to move.</em></h2>
+          <p class="chapter-label" data-reveal>Symptoms</p>
+          <h2 id="symptoms-title" class="display-md" data-split>When a stone starts to move.</h2>
           <p class="chapter-body" data-reveal>
             A stone leaving the kidney can lodge in the ureter, the narrow tube that carries urine to the bladder. It causes pain and can block the kidney, so it is worth getting checked early.
           </p>
@@ -164,8 +158,8 @@
       <section class="chapter" id="stones" aria-labelledby="stones-title">
         <div class="chapter-panel">
           <div class="panel-card">
-          <p class="chapter-label" data-reveal><span class="chapter-num">02</span> Kidney stone treatment</p>
-          <h2 id="stones-title" class="display-md" data-split>Treated from <em>the inside.</em></h2>
+          <p class="chapter-label" data-reveal>Kidney stone treatment</p>
+          <h2 id="stones-title" class="display-md" data-split>Treated from the inside.</h2>
 
           <fieldset class="picker" data-reveal>
             <legend>Choose a stone size</legend>
@@ -204,8 +198,8 @@
       <section class="chapter" id="prostate" aria-labelledby="prostate-title">
         <div class="chapter-panel">
           <div class="panel-card">
-          <p class="chapter-label" data-reveal><span class="chapter-num">03</span> Bladder &amp; prostate</p>
-          <h2 id="prostate-title" class="display-md" data-split>Room to <em>flow again.</em></h2>
+          <p class="chapter-label" data-reveal>Bladder &amp; prostate</p>
+          <h2 id="prostate-title" class="display-md" data-split>Room to flow again.</h2>
           <p class="chapter-body" data-reveal>
             The prostate sits just below the bladder. With age it often grows and squeezes the urine channel, causing a weak stream, straining and getting up at night to pass urine.
           </p>
@@ -227,41 +221,34 @@
       <section class="section section-bone" id="conditions" aria-labelledby="conditions-title">
         <div class="wrap">
           <div class="section-head">
-            <p class="label" data-reveal>(01) What we treat</p>
-            <h2 id="conditions-title" class="display-lg" data-split>Conditions <em>we treat.</em></h2>
+            <h2 id="conditions-title" class="display-lg" data-split>Conditions we treat.</h2>
           </div>
-          <ol class="index-list">
+          <ul class="index-list">
             <li data-reveal>
-              <span class="idx">01</span>
-              <h3>Kidney &amp; ureter stones</h3>
-              <p>Side or back pain, blood in urine, stones seen on a scan, and stones that keep coming back.</p>
-            </li>
-            <li data-reveal>
-              <span class="idx">02</span>
-              <h3>Enlarged prostate</h3>
-              <p>Weak or slow stream, straining, dribbling, or waking at night to pass urine.</p>
-            </li>
-            <li data-reveal>
-              <span class="idx">03</span>
               <h3>Erectile dysfunction</h3>
               <p>Difficulty getting or keeping an erection, checked for its cause and treated with tablets, injection therapy or other options that suit you.</p>
             </li>
             <li data-reveal>
-              <span class="idx">04</span>
               <h3>Premature ejaculation</h3>
               <p>Ejaculating sooner than you or your partner would like. Treatment combines medicine and simple techniques.</p>
             </li>
             <li data-reveal>
-              <span class="idx">05</span>
+              <h3>Kidney &amp; ureter stones</h3>
+              <p>Side or back pain, blood in urine, stones seen on a scan, and stones that keep coming back.</p>
+            </li>
+            <li data-reveal>
+              <h3>Enlarged prostate</h3>
+              <p>Weak or slow stream, straining, dribbling, or waking at night to pass urine.</p>
+            </li>
+            <li data-reveal>
               <h3>Male infertility &amp; varicocele</h3>
               <p>Semen and hormone tests, and treatment including varicocele repair.</p>
             </li>
             <li data-reveal>
-              <span class="idx">06</span>
               <h3>General urology</h3>
               <p>Urine infections, blood in urine, second opinions and review of your scans.</p>
             </li>
-          </ol>
+          </ul>
         </div>
       </section>
 
@@ -269,8 +256,7 @@
       <section class="section section-ink" id="treatments" aria-labelledby="treatments-title">
         <div class="wrap split-sticky">
           <div class="sticky-head">
-            <p class="label" data-reveal>(02) Procedures</p>
-            <h2 id="treatments-title" class="display-lg" data-split>Five procedures, <em>explained plainly.</em></h2>
+            <h2 id="treatments-title" class="display-lg" data-split>Five procedures, explained plainly.</h2>
             <p class="section-lead" data-reveal>Each is done from the inside or through a small keyhole. The doctor explains which one suits you, and why.</p>
           </div>
           <ol class="proc-list">
@@ -315,7 +301,6 @@
           <img src="./img/theatre-wide.webp" srcset="./img/theatre-wide-480.webp 480w, ./img/theatre-wide-800.webp 800w, ./img/theatre-wide.webp 1280w" sizes="100vw" width="1280" height="670" loading="lazy" decoding="async" alt="{{doctorName}} in the operating theatre, guiding a flexible telescope while the camera view shows on a monitor" />
         </picture>
         <figcaption>
-          <span class="label">In the operating theatre</span>
           <span class="theatre-line">{{doctorName}} guides a flexible telescope, watching the camera view on the monitor.</span>
         </figcaption>
       </figure>
@@ -324,8 +309,25 @@
       <section class="section section-bone" id="andrology" aria-labelledby="mens-title">
         <div class="wrap">
           <div class="section-head">
-            <p class="label" data-reveal>(03) Andrology · Confidential</p>
-            <h2 id="mens-title" class="display-xl" data-split>Private. One to one. <em>Without judgement.</em></h2>
+            <p class="label" data-reveal>Andrology</p>
+            <h2 id="mens-title" class="display-xl" data-split>Private. One to one. Without judgement.</h2>
+          </div>
+          <p class="section-lead andro-lead" data-reveal>
+            Problems with erections, ejaculation, desire or fertility are medical conditions with real causes, like blood flow, hormones, diabetes or stress. Most can be treated.
+          </p>
+          <div class="andro-main">
+            <article class="andro-card" data-reveal>
+              <h3>Erectile dysfunction</h3>
+              <p>Difficulty getting or keeping an erection. The cause is checked first. Treatment starts with tablets, and when they are not enough or not suitable, {{doctorName}} offers <strong>penile injection therapy (Bimix and Trimix)</strong>. The dose is set in the clinic and you are taught how to use it safely.</p>
+            </article>
+            <article class="andro-card" data-reveal>
+              <h3>Premature ejaculation</h3>
+              <p>Ejaculating sooner than you or your partner would like. Treatment combines medicine and practical techniques, planned around the cause.</p>
+            </article>
+          </div>
+          <div class="andro-book" data-reveal>
+            <a class="btn btn-dark" href="#book" data-concern="andrology"><span>Book a private consultation</span><i class="arrow" aria-hidden="true"></i></a>
+            <p>You can book with only your initials, and your partner is welcome if you want them there.</p>
           </div>
           <div class="andro-figs" data-reveal>
             <figure>
@@ -337,45 +339,14 @@
               <figcaption><strong>It starts with a private conversation.</strong> One to one with the doctor, to find the cause and agree a plan.</figcaption>
             </figure>
           </div>
-          <div class="mens-grid">
-            <div class="mens-intro" data-reveal>
-              <p class="section-lead">
-                Problems with erections, ejaculation, desire or fertility are medical conditions with real causes, like blood flow, hormones, diabetes or stress. They are common, and most can be treated.
-              </p>
-              <p>
-                As a urologist and andrologist, {{doctorName}} sees you one to one, in private. You can book with only your initials, and your partner is welcome if you want them there.
-              </p>
-              <div class="focus-card">
-                <h3 class="list-title">Areas of special focus</h3>
-                <p>
-                  {{doctorName}} follows recent advances in treating <strong>erectile dysfunction</strong> and <strong>premature ejaculation</strong>, and plans treatment around the cause.
-                </p>
-                <p>
-                  When tablets are not enough or not suitable, he offers <strong>penile injection therapy (Bimix and Trimix)</strong> for erectile dysfunction. The dose is set in the clinic and you are taught how to use it safely.
-                </p>
-              </div>
-              <a class="btn btn-dark" href="#book" data-concern="andrology"><span>Book a private consultation</span><i class="arrow" aria-hidden="true"></i></a>
-            </div>
-            <div data-reveal>
-              <h3 class="list-title">Concerns we help with</h3>
-              <ul class="concern-list">
-                <li><strong>Erectile dysfunction</strong><span>Check-up for the cause, tablets, and Bimix or Trimix injection therapy</span></li>
-                <li><strong>Premature ejaculation</strong><span>Medicine and practical techniques</span></li>
-                <li><strong>Male infertility</strong><span>Semen and hormone tests, varicocele repair</span></li>
-                <li><strong>Low desire or low testosterone</strong><span>Hormone tests and treatment</span></li>
-                <li><strong>Curvature of the penis</strong><span>Peyronie’s disease assessment</span></li>
-                <li><strong>Pre-marriage check-ups</strong><span>Private questions answered</span></li>
-              </ul>
-            </div>
-            <div data-reveal>
-              <h3 class="list-title">What a visit involves</h3>
-              <ol class="step-list">
-                <li>A private conversation about what is happening</li>
-                <li>An examination, only if needed and with your consent</li>
-                <li>Tests such as blood sugar, hormones or a semen analysis</li>
-                <li>A treatment plan explained in plain words</li>
-              </ol>
-            </div>
+          <div class="andro-more" data-reveal>
+            <h3 class="list-title">Other concerns we help with</h3>
+            <ul class="concern-list">
+              <li><strong>Male infertility</strong><span>Semen and hormone tests, varicocele repair</span></li>
+              <li><strong>Low desire or low testosterone</strong><span>Hormone tests and treatment</span></li>
+              <li><strong>Curvature of the penis</strong><span>Peyronie’s disease assessment</span></li>
+              <li><strong>Pre-marriage check-ups</strong><span>Private questions answered</span></li>
+            </ul>
           </div>
         </div>
       </section>
@@ -392,16 +363,13 @@
             </figure>
           </div>
           <div class="doctor-body">
-            <p class="label" data-reveal>(04) Your doctor</p>
             <h2 id="doctor-title" class="display-lg" data-split>{{doctorName}}</h2>
             <p class="section-lead" data-reveal>{{doctorTitle}} at {{clinicName}}.</p>
             <p data-reveal>
-              After an M.S in General Surgery, {{doctorName}} trained as a super-specialist with an M.Ch in Urology, and has performed more than {{proceduresNumber}} urological procedures, including laser stone surgery and prostate surgery. In andrology, his focus is the treatment of erectile dysfunction and premature ejaculation.
+              After an M.S in General Surgery, {{doctorName}} trained as a super-specialist with an M.Ch in Urology. His surgical work includes laser stone surgery and prostate surgery. In andrology, his focus is the treatment of erectile dysfunction and premature ejaculation.
             </p>
             <ul class="doctor-stats" data-reveal>
-              <li><strong>{{procedures}}</strong><span>Procedures performed</span></li>
-              <li><strong>M.Ch</strong><span>Urology</span></li>
-              <li><strong>M.S</strong><span>General Surgery</span></li>
+              <li><strong>{{procedures}}</strong><span>Urological procedures performed</span></li>
             </ul>
             <dl class="facts" data-reveal>
               <div><dt>Qualifications</dt><dd>{{degrees}}</dd></div>
@@ -422,8 +390,7 @@
               <p class="reviews-stars" aria-hidden="true"><!-- @stars --></p>
             </div>
             <div class="reviews-body">
-              <p class="label" data-reveal>({{numReviews}}) Patient reviews</p>
-              <h2 id="reviews-title" class="display-lg" data-split>Rated {{reviewsRating}} <em>on Google.</em></h2>
+                <h2 id="reviews-title" class="display-lg" data-split>Rated {{reviewsRating}} on Google.</h2>
               <p class="section-lead" data-reveal>
                 What patients have written on the clinic’s public Google listing, in their own words.
               </p>
@@ -448,8 +415,8 @@
       <section class="section section-bone" id="blog" aria-labelledby="blog-title" data-requires="blog">
         <div class="wrap">
           <div class="section-head">
-            <p class="label" data-reveal>({{numBlog}}) {{blogTitle}}</p>
-            <h2 id="blog-title" class="display-lg" data-split>Plain answers, <em>written down.</em></h2>
+            <p class="label" data-reveal>{{blogTitle}}</p>
+            <h2 id="blog-title" class="display-lg" data-split>Plain answers, written down.</h2>
           </div>
           <ul class="post-list" data-reveal>
           <!-- @blog -->
@@ -462,8 +429,7 @@
       <section class="section section-bone section-rule" id="faq" aria-labelledby="faq-title">
         <div class="wrap faq-layout">
           <div class="section-head">
-            <p class="label" data-reveal>({{numFaq}}) Answers</p>
-            <h2 id="faq-title" class="display-lg" data-split>Questions <em>patients ask.</em></h2>
+            <h2 id="faq-title" class="display-lg" data-split>Questions patients ask.</h2>
           </div>
           <div class="faq" data-reveal>
         <!-- @faq -->
@@ -475,8 +441,7 @@
       <section class="section section-ink visit" id="visit" aria-labelledby="visit-title">
         <div class="wrap">
           <div class="section-head">
-            <p class="label" data-reveal>({{numVisit}}) Visit</p>
-            <h2 id="visit-title" class="display-xl" data-split>Book a <em>consultation.</em></h2>
+            <h2 id="visit-title" class="display-xl" data-split>Book a consultation.</h2>
           </div>
           <div class="visit-grid">
             <div class="visit-info" data-reveal>

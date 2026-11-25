@@ -142,7 +142,7 @@ export function renderBlogIndex(posts, clinic, cssHref) {
     description: `Plain-language articles on kidney stones, prostate problems and andrology from ${clinic.name}.`,
     noindex: posts.every(p => p.draft),
     body: `      <p class="label">${BLOG.title}</p>
-      <h1 class="display-lg">Plain answers, <em>written down.</em></h1>
+      <h1 class="display-lg">Plain answers, written down.</h1>
       <p class="section-lead">Short articles on kidney stones, prostate problems and andrology.</p>
       <ul class="post-list">
           ${renderPostCards(posts, './')}
