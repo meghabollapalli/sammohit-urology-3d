@@ -1,0 +1,5 @@
+/** Clinic logo mark (concept 2a: line kidney with the male sign). Inherits the text colour. */
+export const LOGO_MARK =
+  '<svg class="brand-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 2 142 186" aria-hidden="true" focusable="false">' +
+  '<defs><mask id="mm" maskUnits="userSpaceOnUse" x="-10" y="0" width="180" height="230"><rect x="-10" y="0" width="180" height="230" fill="#fff"/><circle cx="89.2" cy="113" r="7.6" fill="#000"/></mask></defs><g fill="none" stroke="currentColor" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round" mask="url(#mm)"><path d="M 65.5 54 C 69 50 72.5 45 72.5 37 C 72.5 21 60 11 41 11 C 19 11 6 33 6 62 C 6 95 22 118 46 118 C 64 118 77 106 76 92 C 75 82 67 78 63 74 C 58 69 59.5 61 67 61 C 80 61 89 72 89 92 C 89 122 90 136 90 163 C 90 171.2845 96.7155 178 105 178 C 113.2845 178 120 171.2845 120 163 A 15 15 0 0 0 115.61 152.39"/><path d="M 90 163 A 15 15 0 0 1 115.61 152.39 L 133.99 134.01 M 123.99 134.01 L 133.99 134.01 L 133.99 144.01"/></g><circle cx="89.2" cy="113" r="4" fill="#EE8550"/>' +
+  '</svg>';

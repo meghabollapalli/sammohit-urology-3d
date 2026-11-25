@@ -1,0 +1,48 @@
+name: Publish the live site
+
+# GitHub Pages serves the `site-preview` branch. This workflow is the only
+# thing that should write to it once `main` carries the site: it builds `main`
+# and commits the result there. Pages settings never need to change.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-site
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: Commit the build to site-preview
+        run: |
+          git fetch origin site-preview
+          git worktree add ../site origin/site-preview
+          cd ../site
+          git rm -rq --ignore-unmatch .
+          cp -r "$GITHUB_WORKSPACE/dist/." .
+          cp "$GITHUB_WORKSPACE/scripts/site-branch-readme.md" README.md
+          git add -A
+          if git diff --cached --quiet; then
+            echo "The build is unchanged; nothing to publish."
+            exit 0
+          fi
+          git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -q -m "Publish ${GITHUB_SHA::7}"
+          git push origin HEAD:site-preview
